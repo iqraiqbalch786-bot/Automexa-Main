@@ -1,0 +1,18 @@
+---
+/**
+ * The Mexy demo line, in both versions. CSS shows the one matching <html data-currency> (set by the edge function
+ * from the visitor's country or the amx_cur cookie): GBP visitors get the UK 0161 number, everyone else the US number.
+ * No JS needed; the hidden version is display:none, so it is not focusable or read out.
+ */
+import { company } from "../data/site";
+interface Props { class?: string; loc: string; prefix?: string; suffix?: string; show?: "display" | "note"; cursor?: string }
+const { class: cls, loc, prefix = "", suffix = "", show = "display", cursor } = Astro.props;
+const lines = [
+  { cur: "USD", l: company.mexyLine },
+  { cur: "GBP", l: company.mexyLineUK },
+] as const;
+---
+{show === "note" ? lines.map(({ cur, l }) => <span class="cur-v" data-cur={cur}>{l.note}</span>) :
+  lines.map(({ cur, l }) => (
+    <a class:list={["cur-v", cls]} data-cur={cur} href={`tel:${l.tel}`} data-track="demo_call_click" data-loc={loc} data-cursor={cursor}>{prefix}{l.display}{suffix}<slot /></a>
+  ))}

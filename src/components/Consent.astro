@@ -1,0 +1,19 @@
+---
+/** UK GDPR / PECR consent: optional analytics only. Reject is as easy as accept. No pre-ticked boxes. */
+---
+<div class="consent" data-consent role="region" aria-label="Cookie choices" hidden>
+  <div class="c-inner">
+    <p><strong>Optional analytics?</strong> We'd like to measure which pages help visitors, so we can improve the site. Nothing is set until you choose. <a href="/legal/cookies/">Cookie policy</a></p>
+    <div class="c-actions">
+      <button type="button" class="btn btn-ghost btn-sm" data-consent-choice="denied">Reject</button>
+      <button type="button" class="btn btn-ink btn-sm" data-consent-choice="granted">Accept analytics</button>
+    </div>
+  </div>
+</div>
+<style>
+  .consent { position: fixed; z-index: 60; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
+  .c-inner { pointer-events: auto; width: min(100%, 640px); background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-2); padding: 16px 18px; display: grid; gap: 12px; font-size: var(--fs-sm); color: var(--ink-2); }
+  .c-inner strong { color: var(--ink); }
+  .c-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (min-width: 640px) { .c-inner { grid-template-columns: 1fr auto; align-items: center; } .c-actions { display: flex; } }
+</style>

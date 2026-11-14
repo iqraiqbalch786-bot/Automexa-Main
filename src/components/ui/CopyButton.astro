@@ -1,0 +1,9 @@
+---
+/** Copy-to-clipboard button. Behaviour lives in scripts/ui/chrome.ts (event delegation, one listener). */
+import Icon from "../Icon.astro";
+interface Props { value: string; label: string; class?: string; }
+const { value, label, class: cls } = Astro.props;
+---
+<button type="button" class:list={["copy-btn", cls]} data-copy={value} data-copy-label={label} aria-label={`Copy ${label}`} title={`Copy ${label}`}>
+  <Icon name="copy" class="i-copy" /><Icon name="check" class="i-done" />
+</button>

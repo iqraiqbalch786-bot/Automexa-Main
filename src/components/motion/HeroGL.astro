@@ -1,0 +1,39 @@
+---
+/**
+ * Home hero stage (v4): a real-time WebGL scene of liquid gold (own raymarched shader) that follows the cursor,
+ * splits apart as you scroll and ripples where you click.
+ * - The poster <img> is a still of the shader's first frame. It is the LCP element and the static fallback
+ *   (reduced motion, Save-Data, low-power devices, no WebGL). The canvas fades in over it after load + idle.
+ * - A visible pause control stops the animation (WCAG 2.2.2). The scene is decorative (aria-hidden).
+ */
+---
+<div class="hgl" data-hero-gl aria-hidden="true">
+  <picture>
+    <source media="(max-width: 1023px), (max-aspect-ratio: 9/10)" srcset="/hero/gl-poster-mobile.webp" type="image/webp" width="585" height="1266" />
+    <img class="hgl-poster" src="/hero/gl-poster-desktop.webp" width="1440" height="900" alt="" decoding="async" />
+  </picture>
+  <div class="hgl-shade"></div>
+</div>
+<button class="hgl-toggle" type="button" aria-pressed="false" data-hero-gl-toggle hidden>
+  <span class="hgl-pause"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Pause animation</span>
+  <span class="hgl-play"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 4.5v15l12-7.5Z" fill="currentColor"/></svg>Play animation</span>
+</button>
+<style>
+  .hgl { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: radial-gradient(70% 80% at 72% 40%, #1a150b 0%, #0a0a09 62%); }
+  .hgl picture, .hgl-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hgl-poster { transition: opacity 700ms var(--ease); }
+  .hgl :global(.hero-gl) { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 700ms var(--ease); }
+  .hgl :global(.hero-gl.is-on) { opacity: 1; }
+  .hgl:global(.gl-on) .hgl-poster { opacity: 0; }
+  /* Keeps the headline at full contrast; the gold body sits right (desktop) or top (mobile). */
+  .hgl-shade { position: absolute; inset: 0; pointer-events: none; background:
+      linear-gradient(180deg, rgb(10 10 9 / 0.35) 0%, transparent 26%, transparent 52%, rgb(10 10 9 / 0.88) 86%, #0a0a09 100%),
+      linear-gradient(90deg, rgb(10 10 9 / 0.62) 0%, rgb(10 10 9 / 0.08) 58%, transparent 100%); }
+  .hgl-toggle { position: absolute; right: var(--gutter); bottom: 28px; z-index: 3; display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 999px; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); background: rgb(10 10 9 / 0.55); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: color 200ms, border-color 200ms; }
+  .hgl-toggle[hidden] { display: none; }
+  .hgl-toggle:hover { color: var(--ink); border-color: var(--gold); }
+  .hgl-toggle > span { display: inline-flex; align-items: center; gap: 8px; }
+  .hgl-toggle .hgl-play, .hgl-toggle[aria-pressed="true"] .hgl-pause { display: none; }
+  .hgl-toggle[aria-pressed="true"] .hgl-play { display: inline-flex; }
+  @media (max-width: 759px) { .hgl-toggle { bottom: auto; top: calc(var(--header-h) + 8px); } }
+</style>

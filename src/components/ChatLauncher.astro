@@ -1,0 +1,20 @@
+---
+import Icon from "./Icon.astro";
+---
+<aside class="chat-aside" aria-label="Chat"><button type="button" class="chat-launcher" data-adev-open data-loc="floating" aria-label="Ask our AI (ADEV, our AI chat assistant)">
+  <Icon name="chat" />
+  <span>Ask our AI</span>
+</button></aside>
+<style>
+  .chat-launcher { display: none; }
+  @media (min-width: 760px) {
+    .chat-launcher { position: fixed; z-index: 40; right: 24px; bottom: 24px; display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px 0 14px; border-radius: 999px; background: rgb(24 24 21 / 0.86); color: var(--ink); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-weight: 560; font-size: 0.94rem; box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.4); transition: transform var(--t-fast) var(--ease), opacity var(--t); }
+    .chat-launcher:hover { transform: translateY(-2px); }
+    .chat-launcher :global(.icon) { width: 20px; height: 20px; color: var(--gold); }
+    :global(html.adev-ready) .chat-launcher { opacity: 0; pointer-events: none; }
+    :global(html.adev-loading) .chat-launcher { opacity: 0.7; cursor: progress; }
+    :global(html.consent-open) .chat-launcher { opacity: 0; pointer-events: none; }
+  }
+  :global(html.adev-ready #adev-widget #adev-launcher) { bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important; }
+  @media (min-width: 760px) { :global(html.adev-ready #adev-widget #adev-launcher) { bottom: 24px !important; } }
+</style>

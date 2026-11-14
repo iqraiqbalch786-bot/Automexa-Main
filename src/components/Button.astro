@@ -1,0 +1,11 @@
+---
+import Icon from "./Icon.astro";
+import type { IconName } from "../data/icons";
+interface Props { href: string; variant?: "primary" | "ink" | "ghost"; size?: "sm" | "md" | "lg"; icon?: IconName; arrow?: boolean; track?: string; location?: string; block?: boolean; external?: boolean; class?: string; }
+const { href, variant = "ink", size = "md", icon, arrow = false, track, location, block, external, class: cls } = Astro.props;
+---
+<a href={href} class:list={["btn", `btn-${variant}`, size !== "md" && `btn-${size}`, block && "btn-block", cls]} data-track={track} data-loc={location} target={external ? "_blank" : undefined} rel={external ? "noopener" : undefined}>
+  {icon && <Icon name={icon} />}
+  <span><slot /></span>
+  {arrow && <Icon name="arrowRight" class="arrow" />}
+</a>

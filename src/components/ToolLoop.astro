@@ -1,0 +1,62 @@
+---
+/*
+ * ToolLoop — marquee adapted from React Bits "LogoLoop"
+ * https://reactbits.dev/animations/logo-loop · MIT + Commons Clause · © 2026 David Haz
+ * Changes: no React; CSS-only transform loop (zero JS for motion), text chips instead
+ * of third-party logos (no trademark artwork), duplicate copy is aria-hidden, a real
+ * Pause/Play button (WCAG 2.2.2), pauses on hover/focus, static wrapped list under
+ * prefers-reduced-motion. See CREDITS.md.
+ */
+import Icon from "./Icon.astro";
+interface Props { label?: string; note?: string; }
+const { label = "Tools we connect", note = "Integrations are scoped per project. Tell us what you run and we'll confirm it on the discovery call." } = Astro.props;
+const tools = ["Google Workspace", "Microsoft 365", "HubSpot", "Pipedrive", "GoHighLevel", "Salesforce", "Calendly", "Stripe", "Shopify", "WordPress", "Webflow", "WhatsApp Business", "Slack", "Zapier", "Make", "n8n", "Xero", "QuickBooks", "Google Ads", "Meta Ads"];
+---
+<div class="tl" data-toolloop>
+  <div class="tl-head">
+    <p class="mono tl-k">{label}</p>
+    <button class="tl-btn" type="button" aria-pressed="false" data-tl-toggle>
+      <span class="tl-pause"><Icon name="pause" /> Pause</span><span class="tl-play"><Icon name="play" /> Play</span>
+    </button>
+  </div>
+  <div class="tl-view">
+    <div class="tl-track">
+      <ul class="tl-list" role="list" aria-label={label}>{tools.map((t) => <li class="tl-item">{t}</li>)}</ul>
+      <ul class="tl-list tl-dup" role="list" aria-hidden="true">{tools.map((t) => <li class="tl-item">{t}</li>)}</ul>
+    </div>
+  </div>
+  <p class="tl-note">{note}</p>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-toolloop]").forEach((root) => {
+    const b = root.querySelector<HTMLButtonElement>("[data-tl-toggle]")!;
+    b.addEventListener("click", () => { const p = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(p)); root.toggleAttribute("data-paused", p); });
+  });
+</script>
+<style>
+  /* min-width:0 + full grid span: the max-content track must never widen its parent (grid/flex items default to min-width:auto). */
+  .tl { margin-top: clamp(28px, 4vw, 44px); min-width: 0; max-width: 100%; grid-column: 1 / -1; }
+  .tl-view { max-width: 100%; }
+  .tl-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .tl-k { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+  .tl-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); font: inherit; font-size: var(--fs-xs); cursor: pointer; }
+  .tl-btn { transition: border-color var(--t-fast), color var(--t-fast), background-color var(--t-fast); }
+  .tl-btn:hover { border-color: var(--accent); color: var(--ink); background: var(--surface-2); }
+  .tl-btn span { display: inline-flex; align-items: center; gap: 6px; }
+  .tl-btn :global(.icon) { width: 14px; height: 14px; }
+  .tl-play, [data-paused] .tl-pause { display: none !important; }
+  [data-paused] .tl-play { display: inline-flex !important; }
+  .tl-view { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .tl-track { display: flex; width: max-content; animation: tl-x 48s linear infinite; }
+  .tl-list { display: flex; gap: 10px; padding-right: 10px; }
+  .tl-item { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 10px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 0.93rem; font-weight: 500; color: var(--ink-2); }
+  .tl-view:hover .tl-track, .tl:focus-within .tl-track, [data-paused] .tl-track { animation-play-state: paused; }
+  .tl-note { margin-top: 12px; font-size: var(--fs-xs); color: var(--ink-3); }
+  @keyframes tl-x { to { transform: translate3d(-50%, 0, 0); } }
+  @media (prefers-reduced-motion: reduce) {
+    .tl-btn, .tl-dup { display: none; }
+    .tl-view { -webkit-mask-image: none; mask-image: none; }
+    .tl-track { animation: none; width: auto; }
+    .tl-list { flex-wrap: wrap; padding: 0; }
+  }
+</style>

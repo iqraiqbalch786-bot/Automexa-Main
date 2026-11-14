@@ -1,0 +1,26 @@
+---
+import ServicePage from "../../components/ServicePage.astro";
+import { faqs } from "../../data/site";
+---
+<ServicePage
+  path="/services/growth-marketing/" name="Ads, SEO & AEO/GEO" interest="SEO"
+  title="SEO, AEO/GEO and ads that bring buyers to you"
+  description="Get found on Google, in AI answers (AEO/GEO) and in paid feeds. Ad campaigns, technical and local SEO with lead tracking. Quoted after a free discovery call."
+  eyebrow="SEO, AEO/GEO & ads" heroIcon="search"
+  h1="Get found when buyers are searching."
+  lead="When a buyer searches for what you sell, your name should come up first: on Google, in AI answers and in ads."
+  outcomes={[
+    { icon: "search", title: "Found first", text: "Rank for the searches your buyers make." },
+    { icon: "sparkle", title: "Quoted by AI", text: "Content ChatGPT, Gemini and Google's AI answers can cite." },
+    { icon: "target", title: "Ads that pay back", text: "Campaigns judged on leads and cost per lead." },
+  ]}
+  build={[
+    { icon: "gauge", title: "Technical and local SEO", text: "Speed, structure, schema, indexing and your Google Business Profile." },
+    { icon: "sparkSearch", title: "AEO/GEO content", text: "Clear answers and structured data AI assistants can quote." },
+    { icon: "megaphone", title: "Paid ads with tracked leads", text: "Search and social campaigns, each with its own landing page and a monthly report." },
+  ]}
+  forYou="owners whose competitors outrank them on Google."
+  proof={{ kind: "rank" }}
+  planIds={["enterprise"]}
+  faqs={faqs.growth}
+/>

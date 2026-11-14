@@ -1,0 +1,135 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import { company, process, officeLine, registeredLine, tradingStatement } from "../data/site";
+const who = [
+  { i: "building", t: "Established businesses", s: "Companies already selling, with a team, customers and a reputation to protect." },
+  { i: "growth", t: "Ready to scale", s: "You want more enquiries, more sales and less admin, without hiring ahead of revenue." },
+  { i: "globe", t: "Anywhere in the world", s: "We're a UK company, and we work with clients worldwide." },
+] as const;
+const values = [
+  { i: "fileCheck", t: "Fixed prices, in writing", s: "You see the full cost in your written plan before any work starts." },
+  { i: "key", t: "You own everything", s: "Code, domains, accounts and keys transfer to you." },
+  { i: "shield", t: "Honest by default", s: "Our AI says it's AI, a person is always one step away, and we publish only results we can back up." },
+] as const;
+const what = [
+  { i: "search", t: "Get found", s: "SEO, AEO/GEO and ads that put you in front of buyers.", href: "/services/growth-marketing/" },
+  { i: "browser", t: "Win the enquiry", s: "Websites, brand design and Mexy, our AI receptionist.", href: "/services/websites/" },
+  { i: "workflow", t: "Save hours", s: "Automations, CRMs and AI agents that run the admin.", href: "/services/ai-automation/" },
+] as const;
+---
+<Base title="About Automexa: a UK growth partner for established firms" description="AUTOMEXA LTD (company no. 17390176) is a UK growth partner: websites, growth marketing, automation, brand and AI agents for established businesses worldwide."
+  crumbs={[{ name: "About", href: "/about/" }]}
+  jsonLd={[{ "@context": "https://schema.org", "@type": "AboutPage", name: "About Automexa", about: { "@id": "https://automexa.co.uk/#org" } }]}>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="marker">About Automexa</p>
+      <h1 class="h1">The growth partner for businesses ready to <span class="acc">scale.</span></h1>
+      <p class="lead">{company.legalName} is a UK company. We help established businesses grow with websites that sell, marketing that's found, and AI and automation that take the busywork off your team. We work with clients worldwide.</p>
+    </div>
+  </section>
+
+  <section class="section-tight" style="padding-top:0" aria-labelledby="who-h">
+    <div class="wrap">
+      <h2 class="marker" id="who-h">Who we work with</h2>
+      <ul class="grid grid-3 cards" role="list">
+        {who.map((v, k) => <li class="card" data-reveal style={`--d:${k * 60}ms`}><span class="icon-tile accent"><Icon name={v.i} /></span><h3 class="h3">{v.t}</h3><p class="muted">{v.s}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="svc-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="marker">What we do</p>
+        <h2 class="h2" id="svc-h">Three ways we grow your <span class="acc">business.</span></h2>
+      </div>
+      <ul class="svc" role="list">
+        {what.map((w) => (
+          <li>
+            <a class="svc-row" href={w.href}>
+              <span class="icon-tile accent"><Icon name={w.i} /></span>
+              <span class="svc-t"><strong>{w.t}</strong><span class="muted">{w.s}</span></span>
+              <Icon name="arrowRight" />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="all-svc"><a class="link-arrow" href="/services/">All services and prices <Icon name="arrowRight" /></a></p>
+    </div>
+  </section>
+
+  <section class="section alt" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="marker">How we work</p>
+        <h2 class="h2" id="how-h">From first call to launch in four <span class="acc">steps.</span></h2>
+      </div>
+      <ol class="grid grid-4 steps" role="list">
+        {process.map((s) => (
+          <li class="card">
+            <span class="mono step-n">{s.step}</span>
+            <span class="icon-tile accent"><Icon name={s.icon} /></span>
+            <h3 class="h3">{s.title}</h3>
+            <p class="muted">{s.text}</p>
+            <span class="pill">{s.tag}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="v-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="marker">Our values</p>
+        <h2 class="h2" id="v-h">What you can hold us <span class="acc">to.</span></h2>
+      </div>
+      <ul class="grid grid-3 cards" role="list">
+        {values.map((v, k) => <li class="card" data-reveal style={`--d:${k * 60}ms`}><span class="icon-tile accent"><Icon name={v.i} /></span><h3 class="h3">{v.t}</h3><p class="muted">{v.s}</p></li>)}
+      </ul>
+      <p class="ai-link muted">How we use AI, in full: <a href="/legal/ai-disclosure/">AI disclosure</a>.</p>
+    </div>
+  </section>
+
+  <section class="section alt" aria-labelledby="co-h">
+    <div class="wrap">
+      <div class="section-head"><p class="marker">Company details</p><h2 class="h2" id="co-h">A registered UK <span class="acc">company.</span></h2></div>
+      <dl class="co card">
+        <div><dt>Trading name</dt><dd>{tradingStatement}</dd></div>
+        <div><dt>Legal name</dt><dd>{company.legalName}</dd></div>
+        <div><dt>Company number</dt><dd><a href={`https://find-and-update.company-information.service.gov.uk/company/${company.number}`} rel="noopener" target="_blank">{company.number}</a></dd></div>
+        <div><dt>Registered in</dt><dd>{company.registeredIn}</dd></div>
+        <div><dt>Office</dt><dd>{officeLine}</dd></div>
+        <div><dt>Registered office</dt><dd>{registeredLine}</dd></div>
+        <div><dt>Clients</dt><dd>Worldwide</dd></div>
+        <div><dt>Email</dt><dd><a href={`mailto:${company.email}`}>{company.email}</a></dd></div>
+        <div><dt>Phone</dt><dd><a href={`tel:${company.phone.tel}`}>{company.phone.display}</a></dd></div>
+      </dl>
+    </div>
+  </section>
+</Base>
+<style>
+  .cards { list-style: none; padding: 0; margin-top: 20px; }
+  .cards .card { display: grid; gap: 10px; align-content: start; }
+  .svc { list-style: none; padding: 0; margin-top: clamp(24px, 3vw, 40px); border-top: 1px solid var(--line); }
+  .svc li { border-bottom: 1px solid var(--line); }
+  .svc-row { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 20px 4px; text-decoration: none; color: var(--ink); transition: background-color .2s; }
+  .svc-row:hover { background: rgb(255 255 255 / 0.03); }
+  .svc-row > :global(.icon) { color: var(--accent-ink); transition: transform .2s; }
+  .svc-row:hover > :global(.icon) { transform: translateX(4px); }
+  .svc-t { display: grid; gap: 2px; }
+  .svc-t strong { font-size: clamp(1.15rem, 1rem + 0.6vw, 1.5rem); text-transform: uppercase; letter-spacing: -0.01em; }
+  .steps { list-style: none; padding: 0; margin-top: clamp(24px, 3vw, 40px); }
+  .steps .card { display: grid; gap: 10px; align-content: start; justify-items: start; }
+  .step-n { color: var(--accent-ink); font-size: 0.78rem; letter-spacing: 0.12em; }
+  .ai-link { margin-top: 20px; }
+  .all-svc { margin-top: 20px; }
+
+  .co { display: grid; gap: 0; padding: 8px 24px; margin-top: 24px; }
+  .co div { display: grid; gap: 4px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .co div:last-child { border-bottom: 0; }
+  @media (min-width: 720px) { .co div { grid-template-columns: 220px 1fr; } }
+  .co dt { color: var(--ink-3); font-size: var(--fs-sm); }
+  .co dd { margin: 0; font-weight: 500; }
+</style>

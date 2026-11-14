@@ -1,0 +1,30 @@
+---
+import ServicePage from "../../components/ServicePage.astro";
+---
+<ServicePage
+  path="/services/websites/" name="Websites & landing pages" interest="Website"
+  title="Websites and landing pages that win enquiries"
+  description="Mobile-first websites and landing pages built to convert visitors into enquiries. Simple Website {{starter}}, full code ownership, 30-day aftercare."
+  eyebrow="Websites & landing pages" heroIcon="browser"
+  h1="Turn visitors into enquiries."
+  lead="Your site should bring in enquiries every week. We build fast, mobile-first sites with one clear offer and one next step on every page."
+  outcomes={[
+    { icon: "inbox", title: "More enquiries", text: "Every page leads to a call, a booking or a form." },
+    { icon: "gauge", title: "Fast on any phone", text: "Sub-second load targets keep visitors on the page." },
+    { icon: "shield", title: "Trusted on sight", text: "Clear proof, pricing and company details." },
+  ]}
+  build={[
+    { icon: "target", title: "One clear offer above the fold", text: "Who it's for, what they get and what to do next." },
+    { icon: "inbox", title: "Lead capture that stores every lead", text: "Forms go to your inbox and CRM, with spam protection." },
+    { icon: "key", title: "SEO-ready, and yours", text: "Titles, structured data and a sitemap from day one. You own the code." },
+  ]}
+  forYou="owners whose site looks dated or brings in too few enquiries."
+  proof={{ kind: "traffic" }}
+  planIds={["simple-website", "mexy-crm", "enterprise"]}
+  faqs={[
+    { q: "How much does a website cost?", a: "A Simple Website, a basic Next.js site, is {{starter}}{{gbp: + VAT}} one-time, with the scope confirmed on your discovery call. Larger custom sites and web apps are quoted under Enterprise after a free call. To have Mexy answer your calls too, Mexy with CRM is {{mexySetup}} setup plus {{mexyMonthly}} a month{{gbp:, plus VAT}}." },
+    { q: "Do I own the website?", a: "Yes. On final payment, the code, domain and accounts are transferred to you." },
+    { q: "Can you redesign my existing site?", a: "Yes. We start by finding what's stopping visitors from enquiring, then rebuild around that." },
+    { q: "Will it work on phones?", a: "Every site is designed mobile-first, then adapted for larger screens." },
+  ]}
+/>

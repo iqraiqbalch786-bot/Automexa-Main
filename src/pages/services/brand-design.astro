@@ -1,0 +1,29 @@
+---
+import ServicePage from "../../components/ServicePage.astro";
+---
+<ServicePage
+  path="/services/brand-design/" name="Brand & design" interest="Brand"
+  title="Brand identity and design that earns trust"
+  description="Brand identity systems and design & illustration, quoted after a free discovery call. Logos, colour and type systems, and social assets."
+  eyebrow="Brand & design" heroIcon="palette"
+  h1="Earn trust on first look."
+  lead="A consistent brand makes you look established before anyone picks up the phone, and supports the prices you charge."
+  outcomes={[
+    { icon: "shield", title: "Instant credibility", text: "Look as established as you are." },
+    { icon: "layers", title: "Consistent everywhere", text: "One system across site, social, print and sales." },
+    { icon: "clockBack", title: "Faster marketing", text: "Ready-made assets your team can reuse." },
+  ]}
+  build={[
+    { icon: "sparkle", title: "Logo suite and colour system", text: "Primary and secondary marks, a favicon and an accessible palette." },
+    { icon: "fileCheck", title: "Typography and usage rules", text: "So everything you make looks like you." },
+    { icon: "key", title: "Social kit and source files", text: "Templates, vector exports and commercial rights, yours on delivery." },
+  ]}
+  forYou="businesses that have outgrown a DIY logo."
+  proof={{ kind: "link", text: "See our brand and website work for MSBT, UniLink and RoseEmpire.", href: "/work/", linkText: "View work" }}
+  planIds={["enterprise"]}
+  faqs={[
+    { q: "How much does a brand identity cost?", a: "Brand identity work is quoted after a free discovery call, based on what you need: logo suite, palette, typography rules or a social media kit. The fixed fee is agreed in writing before work starts." },
+    { q: "How much is design and illustration?", a: "Design and illustration is quoted per project after a free discovery call, and the fee is agreed in writing before work starts." },
+    { q: "Can you refresh my existing brand?", a: "Yes. We can refresh your current brand and keep what already works." },
+  ]}
+/>

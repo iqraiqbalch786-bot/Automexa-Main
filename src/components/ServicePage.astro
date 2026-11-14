@@ -1,0 +1,114 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "./Icon.astro";
+import Button from "./Button.astro";
+import CallMexy from "./CallMexy.astro";
+import PlanCard from "./PlanCard.astro";
+import Faq from "./Faq.astro";
+import FinalCta from "./FinalCta.astro";
+import ToolLoop from "./ToolLoop.astro";
+import Assurance from "./Assurance.astro";
+import Proof from "./Proof.astro";
+import { plans, type Faq as FaqT } from "../data/site";
+import type { IconName } from "../data/icons";
+import { faqLd, serviceLd } from "../lib/ld";
+import { moneyText, fillBoth } from "../lib/currency.mjs";
+import CurrencySwitch from "./CurrencySwitch.astro";
+
+interface Item { icon: IconName; title: string; text: string }
+interface Props {
+  path: string; name: string; title: string; description: string;
+  eyebrow: string; h1: string; lead: string; heroIcon: IconName;
+  outcomes: Item[]; build: Item[]; forYou: string;
+  proof: { kind: "all" | "traffic" | "rank" | "link"; text?: string; href?: string; linkText?: string };
+  planIds: string[]; faqs: FaqT[]; interest: string; tools?: boolean;
+}
+const p = Astro.props;
+const svcPlans = p.planIds.map((id) => plans.find((x) => x.id === id)!).filter(Boolean);
+---
+<Base title={p.title} description={fillBoth(p.description)} crumbs={[{ name: "Services", href: "/services/" }, { name: p.name, href: p.path }]}
+  jsonLd={[serviceLd(p.name, fillBoth(p.description), p.path, svcPlans.map((x) => ({ name: x.name, priceKey: x.priceKey }))), faqLd(p.faqs)]}>
+  <section class="page-hero">
+    <div class="wrap sp-hero">
+      <div>
+        <p class="marker">{p.eyebrow}</p>
+        <h1 class="h1">{p.h1.split(" ").slice(0, -1).join(" ")} <span class="acc">{p.h1.split(" ").slice(-1)[0]}</span></h1>
+        <p class="lead">{p.lead}</p>
+        <p class="sp-fit"><Icon name="target" /><span><strong>Best for</strong> {p.forYou}</span></p>
+        <Assurance />
+        <div class="actions">
+          <Button href={`/contact/?interest=${encodeURIComponent(p.interest)}`} variant="primary" size="lg" arrow track="cta_click" location="service_hero">Get my fixed-price plan</Button>
+          {p.path.includes("ai-automation") && <CallMexy location="service_hero" label="Hear our AI agent" />}
+        </div>
+        <Proof {...p.proof} />
+      </div>
+      <div class="sp-badge" aria-hidden="true"><Icon name={p.heroIcon} size={56} /></div>
+    </div>
+  </section>
+
+  <section class="section-tight sp-out" aria-labelledby="sp-out-h">
+    <div class="wrap">
+      <h2 class="h3 label-h" id="sp-out-h">What changes for you</h2>
+      <div class="grid grid-3 sp-grid">
+        {p.outcomes.map((o, k) => (
+          <div class="card sp-o" data-reveal style={`--d:${k * 70}ms`}>
+            <span class="icon-tile accent"><Icon name={o.icon} /></span>
+            <h3 class="h3">{o.title}</h3>
+            <p class="muted">{o.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="sp-build-h">
+    <div class="wrap sp-two">
+      <div class="section-head">
+        <h2 class="h2" id="sp-build-h">What you get.</h2>
+      </div>
+      <ul class="sp-build" role="list">
+        {p.build.slice(0, 3).map((b) => (
+          <li><span class="icon-tile"><Icon name={b.icon} /></span><div><h3 class="sp-bt">{b.title}</h3><p class="muted">{b.text}</p></div></li>
+        ))}
+      </ul>
+      {p.tools && <ToolLoop />}
+    </div>
+  </section>
+
+  {svcPlans.length > 0 && (
+    <section class="section alt" aria-labelledby="sp-price-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="h2" id="sp-price-h">A fixed price, agreed up front.</h2>
+          <p class="lead" set:html={moneyText("Prices in {{curLong}}{{gbp:, excluding VAT}}. 50% books your slot. 30-day aftercare included.")} />
+          <CurrencySwitch id="cur-svc" />
+        </div>
+        <div class:list={["grid", svcPlans.length === 3 ? "grid-3" : "grid-2"]}>{svcPlans.map((x) => <PlanCard plan={x} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <Faq items={p.faqs} id="sp-faq" title="Before you book" />
+  <FinalCta />
+</Base>
+<style>
+  .sp-hero { display: grid; gap: 32px; align-items: end; }
+  @media (min-width: 960px) { .sp-hero { grid-template-columns: 1fr auto; } }
+  .sp-badge { display: none; width: 160px; height: 160px; border-radius: 44px; background: var(--surface-2); border: 1px solid var(--accent-line); color: var(--accent-bright); place-items: center; }
+  @media (min-width: 960px) { .sp-badge { display: grid; } }
+  .sp-badge :global(.icon) { stroke-width: 1.3; }
+  .sp-out { padding-top: 0; }
+  .sp-grid { margin-top: 20px; }
+  .sp-o { display: grid; gap: 12px; align-content: start; }
+  .sp-two { display: grid; gap: 32px; }
+  @media (min-width: 960px) { .sp-two { grid-template-columns: 1fr 1.3fr; gap: 64px; } .sp-two .section-head { position: sticky; top: calc(var(--header-h) + 24px); align-self: start; } }
+  .sp-hero > div:first-child { display: grid; gap: 16px; justify-items: start; }
+  .sp-hero .lead, .sp-hero .actions { margin: 0; }
+  .sp-fit { display: flex; gap: 10px; align-items: flex-start; color: var(--ink-2); }
+  .sp-fit :global(.icon) { width: 18px; height: 18px; color: var(--accent-ink); flex: none; margin-top: 3px; }
+  .sp-fit strong { color: var(--ink); margin-right: 4px; }
+  .sp-build { list-style: none; padding: 0; display: grid; }
+  .sp-build li { display: grid; grid-template-columns: 44px 1fr; gap: 16px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .sp-build li:first-child { border-top: 1px solid var(--line); }
+  .sp-bt { font-size: 1.08rem; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 4px; }
+</style>

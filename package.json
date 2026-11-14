@@ -1,0 +1,32 @@
+{
+  "name": "automexa-site",
+  "private": true,
+  "type": "module",
+  "version": "2.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node --test tests/*.test.mjs",
+    "build:preview": "PUBLIC_SITE_URL=https://automexa-preview.netlify.app PUBLIC_NOINDEX=true astro build && pagefind --site dist",
+    "build:live": "PUBLIC_SITE_URL=https://automexa.co.uk PUBLIC_NOINDEX=false astro build && pagefind --site dist",
+    "lint:copy": "node tools/copy-lint.mjs",
+    "og": "node tools/og-pages.cjs",
+    "audit:seo": "node tools/seo-audit.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "astro": "^7.3.7",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.26"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
+  }
+}

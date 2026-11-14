@@ -1,0 +1,14 @@
+---
+import Base from "../layouts/Base.astro";
+import Faq from "../components/Faq.astro";
+import { faqs } from "../data/site";
+import { faqLd } from "../lib/ld";
+const all = [...faqs.about, ...faqs.general, ...faqs.mexy, ...faqs.growth];
+---
+<Base title="FAQ: Automexa services, pricing and Mexy" description="Answers to common questions about Automexa: who it's for, pricing, payments, ownership, Mexy the AI receptionist, SEO and AEO/GEO." crumbs={[{ name: "FAQ", href: "/faq/" }]} jsonLd={[faqLd(all)]}>
+  <section class="page-hero"><div class="wrap"><p class="marker">FAQ</p><h1 class="h1">Your questions, <span class="acc">answered.</span></h1><p class="lead">Short answers on cost, ownership, time and Mexy. Anything else, ask us.</p></div></section>
+  <Faq items={faqs.about} title="About Automexa" eyebrow="About" id="faq-a" />
+  <Faq items={faqs.general} title="Working with us" eyebrow="General" id="faq-g" />
+  <Faq items={faqs.mexy} title="Mexy, the AI receptionist" eyebrow="Mexy" id="faq-m" />
+  <Faq items={faqs.growth} title="SEO, AEO/GEO and ads" eyebrow="Growth" id="faq-s" />
+</Base>

@@ -1,0 +1,30 @@
+---
+import ServicePage from "../../components/ServicePage.astro";
+---
+<ServicePage
+  tools
+  path="/services/ai-automation/" name="Automations, CRMs & AI agents" interest="Automation"
+  title="Automations & CRM that win back hours every week"
+  description="Automations, chatbots and CRM set-ups that remove manual admin, route leads instantly and save labour costs. Mexy with CRM from {{mexySetup}} setup."
+  eyebrow="Automations & CRM" heroIcon="workflow"
+  h1="Win back hours every week."
+  lead="Leads, calendars, email and accounts update themselves, so your team spends its time selling and delivering."
+  outcomes={[
+    { icon: "clockBack", title: "Hours back each week", text: "Repetitive admin runs automatically." },
+    { icon: "coins", title: "Lower labour costs", text: "Grow without hiring for busywork." },
+    { icon: "bolt", title: "Faster replies", text: "New leads routed and alerted instantly." },
+  ]}
+  build={[
+    { icon: "crm", title: "A CRM set up around how you sell", text: "Pipelines, stages and reminders that match your process." },
+    { icon: "workflow", title: "Your tools in sync", text: "CRM, email, calendar and accounting share data automatically." },
+    { icon: "chat", title: "AI agents and a chatbot", text: "Trained on your business to answer questions, capture leads and draft replies." },
+  ]}
+  forYou="teams retyping the same data into several tools."
+  proof={{ kind: "link", text: "See it working: RoseEmpire OS, the AI-run CRM we built.", href: "/work/roseempire-crm/", linkText: "View case study" }}
+  planIds={["mexy-crm", "enterprise"]}
+  faqs={[
+    { q: "How much does an automation build cost?", a: "Custom automations are quoted after a free discovery call. If you want calls answered and every lead logged, Mexy with CRM is {{mexySetup}} setup plus {{mexyMonthly}} a month{{gbp:, plus VAT}}." },
+    { q: "Which tools can you connect?", a: "Most modern CRMs, email, calendar and accounting tools that offer an API or an automation connector. We confirm your exact stack on the discovery call." },
+    { q: "Do I need a CRM already?", a: "No. We can set one up for you, or work with the one you have." },
+  ]}
+/>

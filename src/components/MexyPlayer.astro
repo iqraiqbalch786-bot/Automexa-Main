@@ -1,0 +1,43 @@
+---
+import Icon from "./Icon.astro";
+---
+<div class="mp" data-mexy-player>
+  <button type="button" class="mp-btn" aria-pressed="false" data-play>
+    <Icon name="play" class="i-play" /><Icon name="pause" class="i-pause" />
+    <span class="sr-only">Play Mexy's real greeting</span>
+  </button>
+  <div class="mp-body">
+    <p class="mp-t">Hear Mexy's real greeting</p>
+    <div class="mp-bar" aria-hidden="true"><span data-prog></span></div>
+  </div>
+  <span class="mp-d mono">0:05</span>
+  <audio preload="none" src="/audio/mexy-greeting.mp3" data-audio></audio>
+</div>
+<style>
+  .mp { display: grid; grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center; padding: 10px 16px 10px 10px; border-radius: 999px; background: var(--dark-2); border: 1px solid var(--dark-line); max-width: 420px; color: var(--on-dark); }
+  .mp-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--accent-bright); color: var(--on-accent); display: grid; place-items: center; }
+  .mp-btn { transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast); }
+  .mp-btn:hover { transform: scale(1.06); box-shadow: 0 0 0 6px var(--accent-soft); }
+  .mp-btn :global(.icon) { width: 18px; height: 18px; }
+  .mp-btn :global(.i-pause), .mp-btn[aria-pressed="true"] :global(.i-play) { display: none; }
+  .mp-btn[aria-pressed="true"] :global(.i-pause) { display: block; }
+  .mp-t { font-size: 0.92rem; font-weight: 560; }
+  .mp-bar { height: 4px; border-radius: 99px; background: rgb(255 255 255 / 0.12); margin-top: 8px; overflow: hidden; }
+  .mp-bar span { display: block; height: 100%; width: 100%; background: var(--accent-bright); transform-origin: left; transform: scaleX(0); }
+  .mp-d { font-size: 0.8rem; color: var(--on-dark-2); }
+</style>
+<script>
+  import { track } from "../scripts/analytics";
+  document.querySelectorAll<HTMLElement>("[data-mexy-player]").forEach((root) => {
+    const a = root.querySelector<HTMLAudioElement>("[data-audio]")!;
+    const b = root.querySelector<HTMLButtonElement>("[data-play]")!;
+    const p = root.querySelector<HTMLElement>("[data-prog]")!;
+    const sr = b.querySelector(".sr-only")!;
+    const set = (on: boolean) => { b.setAttribute("aria-pressed", String(on)); sr.textContent = on ? "Pause greeting" : "Play Mexy's real greeting"; };
+    b.addEventListener("click", () => { if (a.paused) { a.play(); track("greeting_play"); } else a.pause(); });
+    a.addEventListener("play", () => set(true));
+    a.addEventListener("pause", () => set(false));
+    a.addEventListener("ended", () => { set(false); p.style.transform = "scaleX(0)"; });
+    a.addEventListener("timeupdate", () => { p.style.transform = `scaleX(${a.duration ? a.currentTime / a.duration : 0})`; });
+  });
+</script>

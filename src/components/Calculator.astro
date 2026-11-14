@@ -1,0 +1,149 @@
+---
+/** Missed-call cost calculator. All maths happens in the browser; the formula is shown to the visitor. */
+import Icon from "./Icon.astro";
+import { calculatorDefaults as d } from "../data/site";
+interface Props { compact?: boolean; }
+const { compact = false } = Astro.props;
+const fields = [
+  { id: "calls", label: "Inbound calls per week", min: 5, max: 400, step: 5, value: d.callsPerWeek, suffix: "" },
+  { id: "missed", label: "Calls you miss or can't answer", min: 0, max: 80, step: 1, value: d.missedPct, suffix: "%" },
+  { id: "close", label: "Callers who'd become customers", min: 1, max: 90, step: 1, value: d.closePct, suffix: "%" },
+  { id: "value", label: "Average customer value", min: 50, max: 20000, step: 50, value: d.jobValue, suffix: "", money: true },
+];
+const missed0 = d.callsPerWeek * (52 / 12) * (d.missedPct / 100);
+const lost0 = missed0 * (d.closePct / 100);
+const month0 = lost0 * d.jobValue;
+// Server render shows both symbols (same numbers); <html data-currency> picks one until the script takes over.
+const fmt = (c: string) => (n: number) => new Intl.NumberFormat(c === "USD" ? "en-US" : c === "EUR" ? "en-IE" : "en-GB", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(n);
+const both = (n: number) => `<span data-cur="USD">${fmt("USD")(n)}</span><span data-cur="GBP">${fmt("GBP")(n)}</span>`;
+---
+<div class:list={["calc", compact && "compact"]} data-calc>
+  <form class="calc-in" aria-label="Missed-call cost inputs">
+    <div class="calc-cur">
+      <span class="calc-lab" id="cur-l">Currency</span>
+      <div class="seg" role="radiogroup" aria-labelledby="cur-l">
+        {["GBP", "USD", "EUR"].map((c) => (
+          <label><input type="radio" name="currency" value={c} checked={c === d.currency} /><span>{c === "GBP" ? "£" : c === "USD" ? "$" : "€"} {c}</span></label>
+        ))}
+      </div>
+    </div>
+    {fields.map((f) => (
+      <div class="calc-f">
+        <div class="calc-row">
+          <label class="calc-lab" for={`c-${f.id}`}>{f.label}</label>
+          <span class="calc-num">
+            {f.money && <span class="cur-sym" aria-hidden="true"><span data-cur="USD">$</span><span data-cur="GBP">£</span></span>}
+            <input type="number" inputmode="numeric" id={`c-${f.id}-n`} min={f.min} max={f.max} step={f.step} value={f.value} data-num={f.id} aria-label={`${f.label} (number)`} />
+            {f.suffix && <span aria-hidden="true">{f.suffix}</span>}
+          </span>
+        </div>
+        <input type="range" id={`c-${f.id}`} min={f.min} max={f.max} step={f.step} value={f.value} data-range={f.id} style={`--p:${((f.value - f.min) / (f.max - f.min)) * 100}%`} />
+      </div>
+    ))}
+  </form>
+  <div class="calc-out dark">
+    <p class="sr-only" aria-live="polite" data-calc-live></p>
+    <p class="marker">Revenue at risk</p>
+    <p class="calc-big"><span data-out="month" set:html={both(month0)} /><span class="per">/month</span></p>
+    <p class="calc-year">≈ <strong data-out="year" set:html={both(month0 * 12)} /> a year walking to someone else.</p>
+    <ul class="calc-list" role="list">
+      <li><Icon name="phoneMissed" /><span><strong data-out="missedCalls">{Math.round(missed0)}</strong> missed calls a month</span></li>
+      <li><Icon name="users" /><span><strong data-out="lost">{Math.round(lost0)}</strong> customers you could have won</span></li>
+    </ul>
+    <div class="calc-cta">
+      <a class="btn btn-primary btn-block" href="/contact/?from=calculator" data-calc-book data-track="cta_click" data-loc="calculator"><span>Book a free discovery call</span><Icon name="arrowRight" class="arrow" /></a>
+    </div>
+    <details class="calc-how">
+      <summary>How we calculate this</summary>
+      <p>Calls per week × 52 ÷ 12 × % missed = missed calls a month. × % who'd become customers × average value = revenue at risk. It's an estimate based only on your inputs, so real figures can differ.</p>
+    </details>
+  </div>
+</div>
+
+<style>
+  .calc { display: grid; gap: 16px; }
+  @media (min-width: 900px) { .calc { grid-template-columns: 1.1fr 1fr; gap: 20px; } }
+  .calc-in { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(20px, 3vw, 32px); display: grid; gap: 24px; }
+  .calc-lab { font-weight: 540; font-size: 0.95rem; }
+  .calc-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .calc-num { display: inline-flex; align-items: center; gap: 2px; font-family: var(--mono); font-weight: 600; background: var(--bg-2); border-radius: 10px; padding: 0 10px; height: 40px; }
+  .calc-num input { width: 6ch; border: 0; background: transparent; text-align: right; font-family: var(--mono); font-weight: 600; font-size: 0.95rem; -moz-appearance: textfield; appearance: textfield; }
+  .calc-num input::-webkit-outer-spin-button, .calc-num input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .calc-num input:focus { outline: none; }
+  .calc-num:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
+  input[type="range"] { width: 100%; height: 28px; -webkit-appearance: none; appearance: none; background: transparent; --p: 50%; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 99px; background: linear-gradient(to right, var(--ink) var(--p), var(--bg-2) var(--p)); }
+  input[type="range"]::-moz-range-track { height: 6px; border-radius: 99px; background: linear-gradient(to right, var(--ink) var(--p), var(--bg-2) var(--p)); }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); border: 2px solid var(--accent); box-shadow: var(--shadow-2); margin-top: -10px; }
+  input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); border: 2px solid var(--accent); box-shadow: var(--shadow-2); }
+  input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
+  .calc-cur { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .seg { display: inline-flex; background: var(--bg-2); border-radius: 999px; padding: 4px; }
+  .seg label { position: relative; }
+  .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .seg span { display: block; padding: 7px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 560; font-family: var(--mono); }
+  .seg input:checked + span { background: var(--surface-2); color: var(--ink); box-shadow: var(--shadow-1); }
+  .seg input:focus-visible + span { outline: 2px solid var(--ink); }
+  .calc-out { border-radius: var(--r-lg); padding: clamp(24px, 3vw, 36px); display: grid; gap: 16px; align-content: start; }
+  .calc-big { font-size: clamp(2.8rem, 2rem + 3vw, 4.2rem); font-weight: 650; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .calc-big .per { font-size: 1rem; font-weight: 500; letter-spacing: 0; color: var(--on-dark-2); margin-left: 6px; }
+  .calc-year { color: var(--on-dark-2); }
+  .calc-year strong { color: var(--accent-bright); font-weight: 600; }
+  .calc-list { display: grid; gap: 10px; list-style: none; padding: 0; }
+  .calc-list li { display: flex; gap: 10px; align-items: center; }
+  .calc-list :global(.icon) { width: 20px; height: 20px; color: var(--accent-bright); flex: none; }
+  .calc-how summary { cursor: pointer; font-size: var(--fs-sm); color: var(--on-dark-2); min-height: 32px; display: flex; align-items: center; }
+  .calc-how summary { transition: color var(--t-fast); text-underline-offset: 3px; }
+  .calc-how summary:hover { color: var(--on-dark); text-decoration: underline; }
+  .calc-how p { font-size: var(--fs-sm); color: var(--on-dark-2); margin-top: 8px; }
+</style>
+
+<script>
+  import { track } from "../scripts/analytics";
+  import { countTo, seed } from "../scripts/ui/countup";
+  import { getCurrency, EVENT } from "../scripts/currency";
+  document.querySelectorAll<HTMLElement>("[data-calc]").forEach((root) => {
+    const val = (id: string) => Number(root.querySelector<HTMLInputElement>(`[data-range="${id}"]`)!.value);
+    const cur = () => (root.querySelector<HTMLInputElement>("input[name=currency]:checked")?.value || "USD");
+    let tracked = false;
+    const paint = (r: HTMLInputElement) => r.style.setProperty("--p", `${((+r.value - +r.min) / (+r.max - +r.min)) * 100}%`);
+    const update = (user = false) => {
+      const c = cur();
+      // Locale per currency so dollars read "$5,200" (en-GB would print "US$5,200").
+      const fmt = new Intl.NumberFormat(c === "USD" ? "en-US" : c === "EUR" ? "en-IE" : "en-GB", { style: "currency", currency: c, maximumFractionDigits: 0 });
+      const missed = val("calls") * (52 / 12) * (val("missed") / 100);
+      const lost = missed * (val("close") / 100);
+      const month = lost * val("value");
+      // Animated with the CountUp port (React Bits, see CREDITS.md). Instant under reduced motion.
+      const set = (k: string, v: number, f: (n: number) => string) => root.querySelectorAll(`[data-out="${k}"]`).forEach((e) => countTo(e, v, f));
+      const int = (n: number) => String(Math.round(n));
+      set("month", month, (n) => fmt.format(n)); set("year", month * 12, (n) => fmt.format(n));
+      set("missedCalls", missed, int); set("lost", lost, int);
+      // Announce the settled result once (the animated numbers are not a live region).
+      const live = root.querySelector<HTMLElement>("[data-calc-live]");
+      if (live && user) { clearTimeout((live as any)._t); (live as any)._t = setTimeout(() => (live.textContent = `Estimated ${fmt.format(month)} a month, ${fmt.format(month * 12)} a year.`), 700); }
+      root.querySelectorAll(".cur-sym").forEach((e) => (e.textContent = c === "GBP" ? "£" : c === "USD" ? "$" : "€"));
+      const book = root.querySelector<HTMLAnchorElement>("[data-calc-book]");
+      if (book) book.href = `/contact/?from=calculator&risk=${Math.round(month)}&cur=${c}&calls=${val("calls")}&missed=${val("missed")}`;
+      root.querySelectorAll<HTMLInputElement>("[data-range]").forEach(paint);
+      if (user && !tracked) { tracked = true; setTimeout(() => track("roi_calculated", { monthly_loss_band: month < 1000 ? "<1k" : month < 5000 ? "1k-5k" : month < 20000 ? "5k-20k" : "20k+", currency: c }), 1500); }
+    };
+    root.querySelectorAll<HTMLInputElement>("[data-range]").forEach((r) => r.addEventListener("input", () => { root.querySelector<HTMLInputElement>(`[data-num="${r.dataset.range}"]`)!.value = r.value; update(true); }));
+    root.querySelectorAll<HTMLInputElement>("[data-num]").forEach((n) => n.addEventListener("input", () => {
+      const r = root.querySelector<HTMLInputElement>(`[data-range="${n.dataset.num}"]`)!;
+      const v = Math.min(+r.max, Math.max(+r.min, Number(n.value) || 0)); r.value = String(v); update(true);
+    }));
+    // Start in the visitor's currency; follow the site-wide switch until the visitor picks one here (EUR stays local).
+    let picked = false;
+    const follow = (c: string) => { const r = root.querySelector<HTMLInputElement>(`input[name=currency][value="${c}"]`); if (r) r.checked = true; };
+    follow(getCurrency());
+    document.addEventListener(EVENT, () => { if (!picked) { follow(getCurrency()); update(); } });
+    root.querySelectorAll<HTMLInputElement>("input[name=currency]").forEach((r) => r.addEventListener("change", () => { picked = true; update(true); }));
+    { // seed CountUp with the server-rendered values so the first paint never animates
+      const m0 = val("calls") * (52 / 12) * (val("missed") / 100), l0 = m0 * (val("close") / 100), mo0 = l0 * val("value");
+      const sd = (k: string, v: number) => root.querySelectorAll(`[data-out="${k}"]`).forEach((e) => seed(e, v));
+      sd("month", mo0); sd("year", mo0 * 12); sd("missedCalls", m0); sd("lost", l0);
+    }
+    update();
+  });
+</script>

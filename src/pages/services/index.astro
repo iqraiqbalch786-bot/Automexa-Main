@@ -1,0 +1,56 @@
+---
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+import Button from "../../components/Button.astro";
+import Assurance from "../../components/Assurance.astro";
+import { services } from "../../data/site";
+import { moneyText } from "../../lib/currency.mjs";
+---
+<Base title="Services: websites, SEO, ads, automation and AI" description="Websites, landing pages, ads, SEO and AEO/GEO, automations, CRMs, AI agents, brand design and Mexy, our AI receptionist. Fixed prices, in writing." crumbs={[{ name: "Services", href: "/services/" }]}>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="marker">Services</p>
+      <h1 class="h1">Choose the result you <span class="acc">want</span> first.</h1>
+      <p class="lead">Each service is a fixed price, agreed in writing before work starts.</p>
+    </div>
+  </section>
+  <section class="section-tight" style="padding-top:0">
+    <div class="wrap svc-list">
+      {services.map((s, k) => (
+        <a class:list={["svc-row", s.slug === "mexy" && "mexy-scope"]} href={s.href} data-spotlight data-reveal style={`--d:${k * 60}ms`}>
+          <span class="icon-tile accent"><Icon name={s.icon} /></span>
+          <div class="svc-main">
+            <p class="mono svc-n">{s.name}</p>
+            <h2 class="svc-h">{s.outcome}</h2>
+            <p class="muted">{s.summary}</p>
+          </div>
+          <ul class="points svc-pts" role="list">{s.points.map((p) => <li><Icon name="check" /><span>{p}</span></li>)}</ul>
+          <div class="svc-end"><span class="svc-price" set:html={s.priceFrom.startsWith("Quote") ? s.priceFrom : moneyText(`From ${s.priceFrom}`)} /><Icon name="arrowRight" class="go" /></div>
+        </a>
+      ))}
+    </div>
+  </section>
+  <section class="section-tight">
+    <div class="wrap not-sure card">
+      <span class="icon-tile accent"><Icon name="chat" /></span>
+      <div><h2 class="h3">Not sure where to start?</h2><p class="muted">On a free 15-minute call we find where you lose the most customers and tell you what to fix first.</p><Assurance class="ns-assure" /></div>
+      <Button href="/contact/" variant="primary" arrow track="cta_click" location="services_unsure">Book my free 15-minute call</Button>
+    </div>
+  </section>
+</Base>
+<style>
+  .svc-list { display: grid; gap: 12px; }
+  .svc-row { display: grid; gap: 16px; padding: clamp(22px, 3vw, 32px); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); text-decoration: none; transition: border-color var(--t), box-shadow var(--t) var(--ease), transform var(--t) var(--ease); }
+  .svc-row:hover { border-color: var(--line-2); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+  .svc-n { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); }
+  .svc-h { font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem); letter-spacing: -0.03em; margin: 6px 0 8px; }
+  .svc-pts { font-size: 0.93rem; color: var(--ink-2); align-content: center; }
+  .svc-end { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .svc-price { font-weight: 600; }
+  .svc-row :global(.go) { width: 22px; height: 22px; transition: transform var(--t) var(--ease); }
+  .svc-row:hover :global(.go) { transform: translateX(4px); }
+  @media (min-width: 1000px) { .svc-row { grid-template-columns: 44px 1.3fr 1fr 180px; align-items: center; gap: 28px; } .svc-end { flex-direction: column; align-items: flex-end; } }
+  .not-sure { display: grid; gap: 16px; align-items: center; }
+  .not-sure :global(.ns-assure) { margin-top: 12px; }
+  @media (min-width: 800px) { .not-sure { grid-template-columns: 44px 1fr auto; gap: 20px; } }
+</style>

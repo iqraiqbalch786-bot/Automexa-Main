@@ -1,0 +1,60 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import LeadForm from "../components/LeadForm.astro";
+import { company, officeLine, tradingStatement } from "../data/site";
+const booking = import.meta.env.PUBLIC_BOOKING_URL;
+---
+<Base title="Book a free discovery call" description="Book a free 15-minute discovery call with Automexa. Tell us what's holding growth back and get a fixed-price plan in writing. Or call 07999 988450."
+  crumbs={[{ name: "Book a call", href: "/contact/" }]}
+  jsonLd={[{ "@context": "https://schema.org", "@type": "ContactPage", name: "Contact Automexa", about: { "@id": "https://automexa.co.uk/#org" } }]}>
+  <section class="page-hero c-hero">
+    <div class="wrap c-grid">
+      <div class="c-intro">
+        <p class="marker">Free 15-minute call, no obligation</p>
+        <h1 class="h1">Book your free <span class="acc">discovery</span> call.</h1>
+        <p class="lead">Tell us where growth feels stuck. We'll find the biggest leak and send you a fixed-price plan.</p>
+        <ul class="points c-get" role="list">
+          <li><Icon name="target" /><span>Your #1 growth lever, identified</span></li>
+          <li><Icon name="fileCheck" /><span>A fixed price, in writing</span></li>
+          <li><Icon name="shield" /><span>Free, with no obligation</span></li>
+        </ul>
+      </div>
+      <div class="c-alt">
+          <p class="mono c-k">Prefer to talk now?</p>
+          <a href={`tel:${company.phone.tel}`} data-track="call_click" data-loc="contact"><Icon name="phone" /><span><strong>{company.phone.display}</strong><small>Call the team</small></span></a>
+          <a href={company.whatsapp} target="_blank" rel="noopener" data-track="whatsapp_click" data-loc="contact"><Icon name="whatsapp" /><span><strong>WhatsApp</strong><small>Message us</small></span></a>
+          <a href={`mailto:${company.email}`} data-track="email_click" data-loc="contact"><Icon name="mail" /><span><strong>{company.email}</strong><small>Email</small></span></a>
+          <a href={`tel:${company.mexyLineUK.tel}`} data-track="demo_call_click" data-loc="contact_uk"><Icon name="phoneIn" /><span><strong>{company.mexyLineUK.display}</strong><small>Hear Mexy, our AI receptionist (UK line)</small></span></a>
+          <a href={`tel:${company.mexyLine.tel}`} data-track="demo_call_click" data-loc="contact"><Icon name="phoneIn" /><span><strong>{company.mexyLine.display}</strong><small>Hear Mexy, our AI receptionist (US line)</small></span></a>
+          <p class="c-addr"><Icon name="pin" /><span><strong>Our office</strong><small>{officeLine}</small></span></p>
+          <p class="c-trading">{tradingStatement}</p>
+          {booking && <a href={booking} target="_blank" rel="noopener" data-track="booking_open" data-loc="contact"><Icon name="calendar" /><span><strong>Pick a time</strong><small>Open the booking calendar</small></span></a>}
+      </div>
+      <div class="c-form card">
+        <h2 class="h3 c-fh">Tell us about your business</h2>
+        <LeadForm form="discovery" />
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .c-hero { padding-bottom: var(--section); }
+  .c-grid { display: grid; gap: 32px; align-items: start; grid-template-areas: "intro" "form" "alt"; }
+  .c-intro { grid-area: intro; } .c-form { grid-area: form; } .c-alt { grid-area: alt; }
+  @media (min-width: 1000px) { .c-grid { grid-template-columns: 0.9fr 1.1fr; grid-template-rows: auto 1fr; grid-template-areas: "intro form" "alt form"; gap: 0 64px; } .c-alt { align-self: start; } }
+  .c-intro .h1 { max-width: 12ch; }
+  .c-get { margin-top: 24px; font-size: 1.02rem; }
+  .c-alt { margin-top: 32px; display: grid; gap: 4px; }
+  .c-k { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 8px; }
+  .c-alt a { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; padding: 10px 0; text-decoration: none; border-bottom: 1px solid var(--line); }
+  .c-alt a :global(.icon) { width: 40px; height: 40px; padding: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+  .c-alt a:hover :global(.icon) { border-color: var(--ink); }
+  .c-alt span { display: grid; }
+  .c-alt small { color: var(--ink-3); font-size: 0.85rem; }
+  .c-addr { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .c-addr :global(.icon) { width: 40px; height: 40px; padding: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+  .c-trading { margin-top: 12px; font-size: 0.85rem; color: var(--ink-3); max-width: 52ch; }
+  .c-fh { margin-bottom: 20px; }
+  @media (max-width: 999px) { .c-get { display: none; } .c-alt { margin-top: 0; } }
+</style>

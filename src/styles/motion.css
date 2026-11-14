@@ -1,0 +1,153 @@
+/* ==========================================================================
+   Motion layer (v4). Everything here is gated by html.motion / html.has-cursor / html.lenis,
+   which only exist on the "lite" and "full" tiers. The static tier (reduced motion, Save-Data,
+   low-power devices) never gets these classes, so it sees the finished, still design.
+   ========================================================================== */
+
+/* Smooth scroll (Lenis) ------------------------------------------------------ */
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: clip; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Split-text headline reveals -------------------------------------------- */
+html.motion :is([data-split], main .h2:not([data-nosplit]), main .page-hero h1):not(.is-split) { visibility: hidden; animation: split-fallback 0s 2.6s forwards; }
+@keyframes split-fallback { to { visibility: visible; } }
+.sw { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.1em 0.08em 0.16em; margin: -0.1em -0.08em -0.16em; }
+.swi { display: inline-block; }
+html.motion .is-split:not(.is-in) .swi { transform: translate3d(0, 112%, 0) rotate(3deg); }
+html.motion .is-split .swi { transform-origin: 0 100%; transition: transform 1100ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--wait, 0ms) + var(--l, 0) * 95ms); }
+html.motion .is-split.is-in .swi { transform: none; }
+
+/* Custom cursor (desktop, fine pointer) ----------------------------------- */
+html.has-cursor, html.has-cursor * { cursor: none; }
+html.has-cursor :is(input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea, [contenteditable]) { cursor: text; }
+.cur { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; transition: opacity 250ms; }
+.cur-ring, .cur-dot { position: fixed; left: 0; top: 0; border-radius: 50%; pointer-events: none; will-change: transform; }
+.cur-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--gold); transition: opacity 200ms; }
+.cur-ring { width: 38px; height: 38px; margin: -19px 0 0 -19px; display: grid; place-items: center; border: 1px solid rgb(232 190 99 / 0.6);
+  transition: width 380ms var(--ease), height 380ms var(--ease), margin 380ms var(--ease), background-color 300ms, border-color 300ms, scale 200ms; }
+.cur.is-link .cur-ring { width: 64px; height: 64px; margin: -32px 0 0 -32px; background: rgb(232 190 99 / 0.12); border-color: var(--gold); }
+.cur.is-label .cur-ring { width: 104px; height: 104px; margin: -52px 0 0 -52px; background: var(--gold); border-color: transparent; }
+.cur-label { font: 600 0.64rem/1.1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: #0a0a09; text-align: center; opacity: 0; scale: 0.5; transition: opacity 250ms, scale 380ms var(--ease); white-space: nowrap; }
+.cur.is-label .cur-label { opacity: 1; scale: 1; }
+.cur.is-link .cur-dot, .cur.is-label .cur-dot { opacity: 0; }
+.cur.is-mexy .cur-dot { background: var(--mexy); }
+.cur.is-mexy .cur-ring { border-color: rgb(61 255 116 / 0.6); }
+.cur.is-mexy.is-link .cur-ring { background: rgb(61 255 116 / 0.12); border-color: var(--mexy); }
+.cur.is-mexy.is-label .cur-ring { background: var(--mexy); }
+.cur.is-down .cur-ring { scale: 0.82; }
+.cur.is-text, .cur.is-out { opacity: 0; }
+@media (forced-colors: active) { .cur { display: none; } html.has-cursor, html.has-cursor * { cursor: auto; } }
+
+/* Magnetic pull (buttons keep their own transforms; this uses `translate`) */
+@property --magx { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --magy { syntax: "<length>"; inherits: false; initial-value: 0px; }
+html.has-cursor :is(.btn, .icon-btn, .cdock, [data-magnetic]) { translate: var(--magx) var(--magy); }
+
+/* Button label roll: a second copy (text-shadow, never read aloud) rolls up on hover */
+.roll-wrap { display: inline-block; overflow: hidden; vertical-align: top; line-height: 1.3; height: 1.3em; padding-inline: 0.04em; }
+.roll { display: inline-block; }
+html.motion .roll { text-shadow: 0 1.3em currentColor; transition: transform 560ms cubic-bezier(0.7, 0, 0.2, 1); }
+html.motion :is(.btn:hover, .btn:focus-visible) .roll { transform: translateY(-1.3em); }
+
+/* Underline-draw hovers on text links */
+html.motion .link-arrow { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; padding-bottom: 2px; transition: background-size 450ms var(--ease), color 200ms; }
+html.motion .link-arrow:hover, html.motion .link-arrow:focus-visible { background-size: calc(100% - 24px) 1px; color: var(--accent-ink); }
+html.motion .f-cols a { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size 400ms var(--ease), color 200ms; }
+html.motion .f-cols a:hover { background-size: 100% 1px; }
+
+/* Header pill: hover backdrop grows in */
+html.motion .nav-desktop a { position: relative; isolation: isolate; }
+html.motion .nav-desktop a:not([aria-current]):hover { background: transparent; }
+html.motion .nav-desktop a:not([aria-current])::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: rgb(255 255 255 / 0.09); scale: 0.6 0.4; opacity: 0; transition: scale 380ms var(--ease), opacity 250ms; }
+html.motion .nav-desktop a:not([aria-current]):hover::before { scale: 1; opacity: 1; }
+
+/* Tilt glare used by cards with [data-tilt] */
+[data-tilt] { transform-style: preserve-3d; will-change: transform; }
+
+/* Hero (v4) --------------------------------------------------------------- */
+.hero-meta { position: absolute; left: 0; right: 0; top: calc(var(--header-h) + 18px); z-index: 2; display: flex; justify-content: space-between; gap: 16px; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); pointer-events: none; }
+.hero-meta span:last-child { text-align: right; }
+.hero-cue { position: absolute; left: 50%; bottom: 26px; z-index: 2; translate: -50% 0; display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+.hero-cue i { position: relative; width: 1px; height: 34px; background: var(--line-2); overflow: hidden; }
+.hero-cue i::after { content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--gold); }
+html.motion .hero-cue i::after { animation: cue 1.8s cubic-bezier(0.7, 0, 0.2, 1) infinite; }
+@keyframes cue { to { top: 100%; } }
+@media (max-width: 759px) { .hero-meta { display: none; } .hero-cue { display: none; } }
+
+/* Velocity marquee (footer) ----------------------------------------------- */
+.mq { overflow: hidden; border-block: 1px solid var(--line); padding: 18px 0; user-select: none; }
+.mq-track { display: flex; width: max-content; will-change: transform; }
+.mq-track span { flex: none; display: inline-flex; align-items: center; gap: 0.5em; padding-right: 0.5em; font-family: var(--display); font-size: clamp(3.4rem, 9vw, 9rem); line-height: 0.9; text-transform: uppercase; letter-spacing: 0.01em; color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / 0.35); }
+.mq-track span b { font-weight: inherit; color: var(--gold); -webkit-text-stroke: 0; }
+.mq-track span i { width: 0.32em; height: 0.32em; border-radius: 50%; background: var(--gold); flex: none; }
+html:not(.motion) .mq-track { flex-wrap: wrap; width: auto; }
+html:not(.motion) .mq-track span:nth-child(n+2) { display: none; }
+
+/* Page transitions (cross-document View Transitions; browsers without support just navigate) */
+@media (prefers-reduced-motion: no-preference) {
+  .site-header { view-transition-name: site-header; }
+  ::view-transition { background: #0a0a09; }
+  ::view-transition-old(root) { animation: vt-out 560ms cubic-bezier(0.7, 0, 0.2, 1) both; }
+  ::view-transition-new(root) { animation: vt-in 760ms cubic-bezier(0.7, 0, 0.2, 1) both; }
+  ::view-transition-group(site-header) { animation-duration: 0s; }
+  @keyframes vt-out { to { transform: translateY(-8vh) scale(0.96); opacity: 0.25; filter: brightness(0.5); } }
+  @keyframes vt-in { from { clip-path: inset(100% 0 0 0 round 48px 48px 0 0); transform: translateY(6vh); } to { clip-path: inset(0 0 0 0 round 0); transform: none; } }
+}
+
+@media print { .cur, .hero-meta, .hero-cue, .mq, .hgl-toggle { display: none !important; } .swi { transform: none !important; } [data-split] { visibility: visible !important; } }
+
+/* Home hero headline: pre-split on the server, animated by CSS only.
+   - Normal visit: lines slide up right away (word stagger).
+   - First visit with the intro: words stay fully painted behind the preloader (so LCP is the first paint),
+     drop out of view as the curtain lifts at 1250 ms, then slide up in sequence. */
+@media (prefers-reduced-motion: no-preference) {
+  html.motion .hero-h .swi { animation: hs-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) calc(80ms + var(--w) * 55ms) backwards; }
+  html.motion.intro .hero-h .swi { animation: hs-hold calc(1ms + var(--w) * 55ms) linear 1250ms none, hs-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) calc(1251ms + var(--w) * 55ms) none; }
+  @keyframes hs-in { from { transform: translate3d(0, 112%, 0) rotate(3deg); } }
+  @keyframes hs-hold { from, to { transform: translate3d(0, 112%, 0) rotate(3deg); } }
+}
+.hero-h .swi { transform-origin: 0 100%; }
+
+/* Fixed WebGL stage (home): sits behind every section; opaque sections cover it, transparent ones show it */
+.gl-stage { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.gl-stage .hero-gl { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 700ms var(--ease); }
+.gl-stage .hero-gl.is-on { opacity: 1; }
+html.gl-on .hgl-poster { opacity: 0; }
+html.gl-on .hgl { background: transparent; }
+html.gl-on .site-footer { background: transparent; }
+@media print { .gl-stage { display: none !important; } }
+/* Mobile interludes: empty stages where the sculpted mark takes the screen. Only exist while live WebGL runs. */
+.gl-interlude { display: none; }
+/* phones, tablets and narrow windows: the same single-column choreography as hero-mount's "mobile" test */
+@media (max-width: 1023px), (max-aspect-ratio: 9/10) {
+  html.gl-live .gl-interlude { display: flex; align-items: flex-end; height: 78svh; padding: 0 var(--gutter) 28px; }
+  .gl-fig { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); border-top: 1px solid var(--line-2); padding-top: 10px; width: 100%; }
+}
+
+/* Card entrances: revealed cards tip up out of perspective instead of a flat fade (motion tiers only) */
+@media (prefers-reduced-motion: no-preference) {
+  @media (scripting: enabled) {
+    html.motion [data-reveal]:not(.in) { transform: perspective(900px) translate3d(0, 48px, 0) rotateX(-14deg); }
+    html.motion [data-reveal] { transform-origin: 50% 0; transition: opacity 900ms var(--ease), transform 1100ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: var(--d, 0ms); }
+  }
+}
+
+/* Card hover: a light runs around the border (conic gradient masked to a 1px ring) */
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+html.motion :is(.svc, .plan, .step, .card) { position: relative; }
+html.motion :is(.svc, .plan, .step)::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity 350ms;
+  background: conic-gradient(from var(--ang), transparent 0 62%, color-mix(in srgb, var(--accent) 90%, white) 80%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+html.motion :is(.svc, .plan, .step):is(:hover, :focus-within)::after { opacity: 1; animation: ang 2.6s linear infinite; }
+@keyframes ang { to { --ang: 360deg; } }
+html.motion .step { transition: transform 450ms var(--ease), border-color 300ms; }
+html.motion .step:hover { transform: translateY(-4px); }
+html.motion .plan { transition: transform 450ms var(--ease), box-shadow 450ms var(--ease); }
+html.motion .plan:hover { transform: translateY(-4px); }
+
+/* Section markers: the hairline draws in when the heading reveals */
+html.motion .marker::before { transform-origin: 0 50%; transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1) 150ms; }
+html.motion .section-head:not(:has(.is-in)) .marker::before, html.motion .reel-head:not(:has(.is-in)) .marker::before { transform: scaleX(0); }

@@ -1,0 +1,25 @@
+---
+import CallMexy from "./CallMexy.astro";
+import Button from "./Button.astro";
+import Assurance from "./Assurance.astro";
+interface Props { title?: string; text?: string; }
+const { title = "See what we'd fix first.", text = "Call the live Mexy demo now, or book a free 15-minute call and get a fixed-price plan in writing." } = Astro.props;
+---
+<section class="section final mexy-scope" aria-labelledby="final-h">
+  <div class="wrap final-in">
+    <h2 class="h2" id="final-h">{title}</h2>
+    <p class="lead">{text}</p>
+    <Assurance />
+    <div class="actions">
+      <CallMexy location="final_cta" />
+      <Button href="/contact/" variant="ghost" size="lg" arrow track="cta_click" location="final_cta">Book my free 15-minute call</Button>
+    </div>
+  </div>
+</section>
+<style>
+  .final { position: relative; overflow: hidden; background: var(--bg-2); border-top: 1px solid var(--line); }
+  .final-in { display: grid; gap: 20px; justify-items: start; max-width: 860px; }
+  .final .h2 { font-size: clamp(2.2rem, 1.4rem + 3.4vw, 4rem); }
+  .final .actions { margin-top: 12px; }
+  .final::after { content: ""; position: absolute; right: -10%; bottom: -40%; width: 60vw; max-width: 720px; aspect-ratio: 1; border-radius: 50%; border: 1px solid var(--accent-line); box-shadow: 0 0 0 80px rgb(61 255 116 / 0.03), 0 0 0 160px rgb(61 255 116 / 0.02); pointer-events: none; }
+</style>

@@ -1,0 +1,42 @@
+# For static hosting on Apache (e.g. GoDaddy cPanel). Mirrors netlify.toml.
+# Forms: Apache can't run the Netlify functions. Build with PUBLIC_LEAD_ENDPOINT and PUBLIC_NEWSLETTER_ENDPOINT
+# pointing at the deployed function URLs, and add this site's origin to the functions' ALLOWED_ORIGINS. See DEPLOY.md.
+Options -Indexes
+ErrorDocument 404 /404.html
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# One canonical host: www -> apex (HTTPS)
+RewriteCond %{HTTP_HOST} ^www\.automexa\.co\.uk$ [NC]
+RewriteRule ^ https://automexa.co.uk%{REQUEST_URI} [L,R=301]
+RewriteRule ^portfolio/?$ /work/ [L,R=301]
+RewriteRule ^scorecard/?$ /missed-call-calculator/ [L,R=301]
+RewriteRule ^pay/?$ /pricing/ [L,R=301]
+RewriteRule ^about-us/?$ /about/ [L,R=301]
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-ueXiPwx2f2qHHbZK7SY2CkL10DEaodnZUrpuDwvzZ0g=' https://adev-web-developer-plugin.adeelcolchester.workers.dev https://plausible.io https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.netlify.app https://adev-web-developer-plugin.adeelcolchester.workers.dev https://plausible.io https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://challenges.cloudflare.com; media-src 'self' blob:; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+  # Hashed build assets never change; pages and search index revalidate.
+  <FilesMatch "\.(js|css|woff2|avif|webp|jpg|png|svg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html|xml|txt)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+  <If "%{REQUEST_URI} =~ m#^/pagefind/#">
+    Header set Cache-Control "public, max-age=3600"
+  </If>
+  <If "%{REQUEST_URI} =~ m#^/og/#">
+    Header set Cache-Control "public, max-age=86400"
+  </If>
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json application/xml image/svg+xml
+</IfModule>
+<IfModule mod_mime.c>
+  AddType application/wasm .wasm
+</IfModule>

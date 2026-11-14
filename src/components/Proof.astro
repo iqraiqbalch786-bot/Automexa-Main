@@ -1,0 +1,27 @@
+---
+/**
+ * Proof placed next to a claim. Numbers are Automexa's results across client projects (never per client)
+ * and always carry the "results vary" qualifier.
+ */
+import Icon from "./Icon.astro";
+interface Props { kind?: "all" | "traffic" | "rank" | "link"; text?: string; href?: string; linkText?: string; class?: string; }
+const { kind = "all", text, href = "/#results", linkText = "See results", class: cls } = Astro.props;
+const lines = {
+  all: "Across our client projects: sales up 71.34%, website traffic up 48%, top-3 Google rankings in 45 days.",
+  traffic: "Across our client projects: website traffic up 48% and sales up 71.34%.",
+  rank: "Across our client projects: top-3 Google rankings in 45 days and website traffic up 48%.",
+  link: "",
+};
+const body = text ?? lines[kind];
+const numeric = kind !== "link";
+---
+<p class:list={["proof", cls]}>
+  <Icon name={numeric ? "growth" : "eye"} />
+  <span>{body} {numeric && <span class="pv">Results vary by project.</span>} <a href={href}>{linkText}</a></span>
+</p>
+<style>
+  .proof { display: flex; gap: 10px; align-items: flex-start; font-size: 0.9rem; color: var(--ink-2); max-width: 62ch; }
+  .proof :global(.icon) { width: 18px; height: 18px; color: var(--accent-ink); flex: none; margin-top: 2px; }
+  .proof .pv { color: var(--ink-3); }
+  .proof a { color: var(--accent-ink); font-weight: 560; white-space: nowrap; }
+</style>

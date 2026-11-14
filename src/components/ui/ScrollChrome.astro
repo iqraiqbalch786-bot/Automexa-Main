@@ -1,0 +1,25 @@
+---
+/** Reading-progress bar (top) and a back-to-top button. Progress uses a CSS scroll timeline where supported, JS otherwise. */
+import Icon from "../Icon.astro";
+---
+<div class="sprog" aria-hidden="true"><span data-sprog></span></div>
+<button type="button" class="to-top" data-to-top aria-label="Back to top" title="Back to top"><Icon name="arrowUp" /></button>
+<style>
+  .sprog { position: fixed; z-index: 70; inset: 0 0 auto 0; height: 3px; pointer-events: none; }
+  .sprog span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-deep), var(--gold) 40%, var(--gold-bright)); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .sprog span { animation: sprog linear both; }
+      /* separate rule so the CSS minifier can't fold the timeline into the shorthand (Chrome rejects that) */
+      .sprog > span { animation-timeline: scroll(root block); }
+      @keyframes sprog { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    }
+  }
+  .to-top { position: fixed; z-index: 41; left: 10px; bottom: calc(86px + env(safe-area-inset-bottom)); width: 46px; height: 46px; border-radius: 999px; display: grid; place-items: center; color: var(--ink); background: rgb(24 24 21 / 0.9); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.5); opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity var(--t) var(--ease), transform var(--t) var(--ease), visibility 0s linear var(--t), background-color var(--t-fast), border-color var(--t-fast), color var(--t-fast); }
+  .to-top :global(.icon) { width: 20px; height: 20px; }
+  .to-top.show { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .to-top:hover { background: var(--gold); color: #0a0a09; border-color: var(--gold); }
+  @media (min-width: 760px) { .to-top { left: auto; right: 24px; bottom: 96px; } }
+  :global(html.consent-open) .to-top, :global(html.menu-open) .to-top { opacity: 0; visibility: hidden; }
+  @media print { .sprog, .to-top { display: none !important; } }
+</style>

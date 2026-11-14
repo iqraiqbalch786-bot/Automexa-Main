@@ -1,0 +1,46 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import Calculator from "../components/Calculator.astro";
+import CallMexy from "../components/CallMexy.astro";
+import Faq from "../components/Faq.astro";
+import FinalCta from "../components/FinalCta.astro";
+import { faqLd } from "../lib/ld";
+const items = [
+  { q: "How is the missed-call cost calculated?", a: "Calls per week × 52 ÷ 12 gives calls per month. Multiply by the share you miss to get missed calls, then by the share of callers who'd become customers, then by your average customer value. The result is revenue at risk each month." },
+  { q: "Is my data saved?", a: "No. The calculator runs entirely in your browser. Nothing is sent unless you choose to book a call." },
+  { q: "How do I stop missing calls?", a: "Forward unanswered or after-hours calls to an AI receptionist like Mexy, which answers on the first ring, captures the caller's details and books them in." },
+];
+---
+<Base title="Missed-call calculator: what voicemail costs you" description="Free calculator: see how much revenue missed and unanswered calls cost your business each month and year. Runs in your browser; nothing is stored."
+  crumbs={[{ name: "Missed-call calculator", href: "/missed-call-calculator/" }]}
+  jsonLd={[faqLd(items), { "@context": "https://schema.org", "@type": "WebApplication", name: "Missed-call cost calculator", applicationCategory: "BusinessApplication", operatingSystem: "Any", offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" } }]}>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="marker">Free tool</p>
+      <h1 class="h1">What are missed calls <span class="acc">costing</span> you?</h1>
+      <p class="lead">Move four sliders to see the revenue missed calls cost you each month. It runs in your browser and saves nothing.</p>
+    </div>
+  </section>
+  <section class="section-tight" style="padding-top:0"><div class="wrap"><Calculator /></div></section>
+  <section class="section" aria-labelledby="fix-h">
+    <div class="wrap fix">
+      <div>
+        <h2 class="h2" id="fix-h">Stop losing callers to voicemail.</h2>
+        <ul class="points fix-pts" role="list">
+          <li><Icon name="phoneIn" /><span>Mexy answers every call on the first ring</span></li>
+          <li><Icon name="calendarCheck" /><span>Callers get booked while they're still keen</span></li>
+          <li><Icon name="bell" /><span>You get a summary of every call</span></li>
+        </ul>
+      </div>
+      <CallMexy location="calc_page" label="Hear Mexy answer" />
+    </div>
+  </section>
+  <Faq items={items} title="About the calculator" id="calc-faq" />
+  <FinalCta />
+</Base>
+<style>
+  .fix { display: grid; gap: 28px; align-items: center; }
+  @media (min-width: 900px) { .fix { grid-template-columns: 1fr auto; } }
+  .fix-pts { margin-top: 20px; font-size: 1.05rem; }
+</style>

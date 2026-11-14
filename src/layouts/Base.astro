@@ -1,0 +1,165 @@
+---
+import "../styles/global.css";
+import "../styles/motion.css";
+import Preloader from "../components/motion/Preloader.astro";
+import boot from "../scripts/motion/boot-inline.txt?raw";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import MobileBar from "../components/MobileBar.astro";
+import Consent from "../components/Consent.astro";
+import ChatLauncher from "../components/ChatLauncher.astro";
+import ScrollChrome from "../components/ui/ScrollChrome.astro";
+import ContactDock from "../components/ui/ContactDock.astro";
+import SearchDialog from "../components/ui/SearchDialog.astro";
+import ConfirmDialog from "../components/ui/ConfirmDialog.astro";
+import { SITE_URL, company } from "../data/site";
+import { fillBoth } from "../lib/currency.mjs";
+
+export interface Crumb { name: string; href: string }
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown>[];
+  crumbs?: Crumb[];
+  noindex?: boolean;
+  type?: "website" | "article";
+}
+const { title, description, ogImage: ogProp, jsonLd = [], crumbs, noindex = false, type = "website" } = Astro.props;
+const path = Astro.url.pathname;
+// One site-wide share card (Barry's approved artwork, 1200x630). A page can still pass its own ogImage.
+// The old per-page cards (tools/og-pages.cjs -> public/og/pages/) are kept on disk but no longer used.
+// New filename on each change so Facebook, LinkedIn, X and WhatsApp fetch it fresh.
+const OG_DEFAULT = "/og/automexa-og-v2.jpg";
+const OG_ALT = "Automexa: Win more customers from your website, Google and every call.";
+const ogImage = ogProp || OG_DEFAULT;
+const gsc = import.meta.env.PUBLIC_GSC_VERIFICATION;
+const bing = import.meta.env.PUBLIC_BING_VERIFICATION;
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const fullTitle = title.includes("Automexa") ? title : `${title} | Automexa`;
+const robots = noindex || import.meta.env.PUBLIC_NOINDEX === "true" ? "noindex, nofollow" : "index, follow, max-image-preview:large";
+
+const org = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": `${SITE_URL}/#org`,
+  name: company.brand,
+  legalName: company.legalName,
+  url: SITE_URL,
+  logo: `${SITE_URL}/icons/icon-512.png`,
+  email: company.email,
+  telephone: company.phone.intl,
+  contactPoint: [
+    { "@type": "ContactPoint", contactType: "sales", telephone: company.phone.intl, areaServed: "GB", availableLanguage: "en" },
+    { "@type": "ContactPoint", contactType: "Mexy AI receptionist demo line (UK)", telephone: company.mexyLineUK.intl, areaServed: "GB", availableLanguage: "en" },
+    { "@type": "ContactPoint", contactType: "Mexy AI receptionist demo line (US)", telephone: company.mexyLine.display, areaServed: "US", availableLanguage: "en" },
+  ],
+  identifier: { "@type": "PropertyValue", propertyID: "Companies House", value: company.number },
+  address: { "@type": "PostalAddress", streetAddress: company.office.street, addressLocality: company.office.locality, postalCode: company.office.postcode, addressCountry: company.office.countryCode },
+  sameAs: [`https://find-and-update.company-information.service.gov.uk/company/${company.number}`, ...company.socials.map((s) => s.href)],
+};
+const business = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": `${SITE_URL}/#business`,
+  name: company.brand,
+  legalName: company.legalName,
+  description: "Growth partner for established businesses: websites and landing pages, ads, SEO and AEO/GEO, automations, CRMs and AI agents, brand design, and Mexy, an AI receptionist.",
+  url: SITE_URL,
+  image: `${SITE_URL}${OG_DEFAULT}`,
+  logo: `${SITE_URL}/icons/icon-512.png`,
+  email: company.email,
+  telephone: company.phone.intl,
+  priceRange: fillBoth("{{starter}} to {{mexySetup}} setup plus {{mexyMonthly}} a month; enterprise quoted"),
+  address: org.address,
+  areaServed: "Worldwide",
+  parentOrganization: { "@id": `${SITE_URL}/#org` },
+  sameAs: [`https://find-and-update.company-information.service.gov.uk/company/${company.number}`, ...company.socials.map((s) => s.href)],
+};
+const ld: Record<string, unknown>[] = [org, ...(["/", "/about/", "/contact/"].includes(path) ? [business] : []), ...jsonLd];
+if (crumbs?.length) {
+  ld.push({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ name: "Home", href: "/" }, ...crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: new URL(c.href, SITE_URL).href })) });
+}
+---
+<!doctype html>
+<html lang="en-GB" data-currency="USD">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <script is:inline set:html={boot.trim()} />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  {!noindex && <link rel="canonical" href={canonical} />}
+  <meta name="robots" content={robots} />
+  {gsc && <meta name="google-site-verification" content={gsc} />}
+  {bing && <meta name="msvalidate.01" content={bing} />}
+  <meta name="theme-color" content="#0a0a09" />
+  <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/league-gothic.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <meta property="og:type" content={type} />
+  <meta property="og:site_name" content="Automexa" />
+  <meta property="og:locale" content="en_GB" />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={new URL(ogImage, SITE_URL).href} />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={OG_ALT} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={new URL(ogImage, SITE_URL).href} />
+  <meta name="twitter:image:alt" content={OG_ALT} />
+  {ld.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+  <slot name="head" />
+</head>
+<body>
+  {path === "/" && <Preloader />}
+  <a class="skip-link" href="#main">Skip to content</a>
+  <Header />
+  <ScrollChrome />
+  <main id="main" tabindex="-1" data-pagefind-body={noindex ? undefined : ""}>
+    {crumbs && crumbs.length > 0 && (
+      <nav class="crumbs wrap" aria-label="Breadcrumb" data-pagefind-ignore>
+        <ol>
+          <li><a href="/">Home</a></li>
+          {crumbs.map((c, i) => <li>{i === crumbs.length - 1 ? <span aria-current="page">{c.name}</span> : <a href={c.href}>{c.name}</a>}</li>)}
+        </ol>
+      </nav>
+    )}
+    <slot />
+  </main>
+  <Footer />
+  <MobileBar />
+  <ChatLauncher />
+  <ContactDock />
+  <Consent />
+  <SearchDialog />
+  <ConfirmDialog />
+  <script>
+    import { initAnalytics } from "../scripts/analytics";
+    import { initAdev } from "../scripts/adev";
+    import { initReveal } from "../scripts/reveal";
+    import { initSpotlight } from "../scripts/ui/spotlight";
+    import { initChrome } from "../scripts/ui/chrome";
+    import { initAttribution } from "../scripts/attribution";
+    import { initMotion } from "../scripts/motion/index";
+    import { initCurrency } from "../scripts/currency";
+    initCurrency();
+    initMotion();
+    initAnalytics();
+    initAdev();
+    initReveal();
+    initSpotlight();
+    initChrome();
+    initAttribution();
+  </script>
+</body>
+</html>

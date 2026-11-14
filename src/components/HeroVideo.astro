@@ -1,0 +1,78 @@
+---
+/**
+ * Background video for the home hero.
+ * - Original, self-made footage (tools/hero-video-gen.py), self-hosted: no licence risk.
+ * - The poster <img> is the LCP element and is all that loads under prefers-reduced-motion or Save-Data.
+ * - The <video> gets its sources only after the page has loaded, picking the mobile or desktop encode.
+ * - Muted, looping, playsinline; a visible Pause/Play control meets WCAG 2.2.2.
+ */
+---
+<div class="hv" data-hero-video-wrap>
+  <picture>
+    <source media="(max-width: 760px)" srcset="/video/hero-poster-mobile.webp" type="image/webp" width="540" height="960" />
+    <img class="hv-poster" src="/video/hero-poster-desktop.webp" width="1280" height="720" alt="" fetchpriority="high" decoding="async" />
+  </picture>
+  <video class="hv-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture data-hero-video></video>
+  <div class="hv-shade" aria-hidden="true"></div>
+</div>
+<button class="hv-toggle" type="button" aria-pressed="false" data-hero-video-toggle hidden>
+  <span class="hv-pause"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Pause background</span>
+  <span class="hv-play"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 4.5v15l12-7.5Z" fill="currentColor"/></svg>Play background</span>
+</button>
+<style>
+  .hv { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #0a0a09; }
+  .hv picture, .hv-poster, .hv-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hv-video { opacity: 0; transition: opacity 900ms var(--ease); }
+  .hv-video.is-playing { opacity: 1; }
+  /* Dark overlay: keeps H1/H2 at full contrast over any frame. */
+  .hv-shade { position: absolute; inset: 0; background:
+      linear-gradient(180deg, rgb(10 10 9 / 0.55) 0%, rgb(10 10 9 / 0.15) 30%, rgb(10 10 9 / 0.35) 62%, rgb(10 10 9 / 0.94) 100%),
+      linear-gradient(90deg, rgb(10 10 9 / 0.7) 0%, rgb(10 10 9 / 0.1) 70%); }
+  .hv-toggle { position: absolute; right: var(--gutter); bottom: 96px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: 999px; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); background: rgb(10 10 9 / 0.55); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .hv-toggle[hidden] { display: none; }
+  .hv-toggle:hover { color: var(--ink); }
+  .hv-toggle > span { display: inline-flex; align-items: center; gap: 8px; }
+  .hv-toggle .hv-play, .hv-toggle[aria-pressed="true"] .hv-pause { display: none; }
+  .hv-toggle[aria-pressed="true"] .hv-play { display: inline-flex; }
+  @media (max-width: 759px) { .hv-toggle { bottom: auto; top: calc(var(--header-h) + 8px); } }
+</style>
+<script>
+  const video = document.querySelector<HTMLVideoElement>("[data-hero-video]");
+  const toggle = document.querySelector<HTMLButtonElement>("[data-hero-video-toggle]");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  const saveData = !!conn?.saveData;
+  let userPaused = false;
+  let started = false;
+
+  const sources = () => {
+    const m = matchMedia("(max-width: 760px)").matches ? "mobile" : "desktop";
+    return [
+      { src: `/video/hero-${m}.webm`, type: "video/webm" },
+      { src: `/video/hero-${m}.mp4`, type: "video/mp4" },
+    ];
+  };
+  const play = () => { if (!video || userPaused || reduce.matches) return; video.play().catch(() => {}); };
+  const start = () => {
+    if (!video || started || reduce.matches || saveData) return;
+    started = true;
+    for (const s of sources()) { const el = document.createElement("source"); el.src = s.src; el.type = s.type; video.append(el); }
+    video.dataset.variant = video.querySelector("source")!.src.includes("mobile") ? "mobile" : "desktop";
+    video.addEventListener("playing", () => video.classList.add("is-playing"), { once: true });
+    video.load();
+    play();
+    if (toggle) toggle.hidden = false;
+    // Pause off-screen to save battery; resume when the hero is back in view.
+    new IntersectionObserver(([e]) => (e.isIntersecting ? play() : video.pause())).observe(video);
+  };
+  toggle?.addEventListener("click", () => {
+    if (!video) return;
+    userPaused = !userPaused;
+    toggle.setAttribute("aria-pressed", String(userPaused));
+    userPaused ? video.pause() : play();
+  });
+  reduce.addEventListener("change", () => { if (reduce.matches && video) { video.pause(); video.classList.remove("is-playing"); if (toggle) toggle.hidden = true; } else start(); });
+  // Start after load so the poster (LCP) and critical CSS/JS win the bandwidth.
+  const kick = () => ("requestIdleCallback" in window ? (window as any).requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 200));
+  if (document.readyState === "complete") kick(); else addEventListener("load", kick, { once: true });
+</script>

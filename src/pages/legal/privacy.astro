@@ -1,0 +1,70 @@
+---
+import Legal from "../../layouts/Legal.astro";
+import { company, officeLine, registeredLine, tradingStatement } from "../../data/site";
+---
+<Legal title="Privacy policy" path="/legal/privacy/" updated="12 October 2026" description="How Automexa (AUTOMEXA LTD) collects, uses and protects personal data under UK GDPR, and your rights.">
+  <h2>1. Who we are</h2>
+  <p>{company.legalName} ("Automexa", "we", "us") is a company registered in {company.registeredIn} (no. {company.number}), registered office {registeredLine}, office {officeLine}. We are the controller of the personal data described here. Contact: <a href={`mailto:${company.email}`}>{company.email}</a>. ICO registration number: [to confirm].</p>
+  <p>{tradingStatement}</p>
+
+  <h2>2. What we collect</h2>
+  <ul>
+    <li><strong>Enquiries:</strong> name, email, phone (optional), business name, website, the services you're interested in, budget range, your message, and your choices about privacy and marketing.</li>
+    <li><strong>Newsletter sign-ups:</strong> your email address, the consent wording you agreed to and when, the page you signed up on, referrer and campaign tags (UTM), your browser's user-agent and a one-way hash of your IP address.</li>
+    <li><strong>Technical data with enquiries:</strong> the page you used, referrer and campaign tags (UTM), your browser's user-agent, and a one-way hash of your IP address used only for spam and abuse protection.</li>
+    <li><strong>Analytics (only if you accept):</strong> pages viewed and actions such as button clicks, collected by our analytics provider.</li>
+    <li><strong>Calls to our AI demo line:</strong> when you call Mexy, your number and what you say are processed by our voice providers so she can answer. Calls may be transcribed and recorded to provide and improve the service [to confirm recording settings].</li>
+    <li><strong>Chat:</strong> if you open the ADEV chat, your messages and any files you choose to upload are processed by the chat provider to answer you.</li>
+    <li><strong>WhatsApp, email and phone:</strong> whatever you choose to send us.</li>
+  </ul>
+
+  <h2>3. Why we use it, and our lawful basis</h2>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Purposes and lawful bases"><table>
+    <thead><tr><th>Purpose</th><th>Lawful basis (UK GDPR Art. 6)</th></tr></thead>
+    <tbody>
+      <tr><td>Replying to your enquiry and preparing a quote</td><td>Steps at your request before a contract (6(1)(b)), and legitimate interests (6(1)(f))</td></tr>
+      <tr><td>Delivering services you buy from us</td><td>Contract (6(1)(b))</td></tr>
+      <tr><td>Preventing spam, fraud and abuse</td><td>Legitimate interests (6(1)(f))</td></tr>
+      <tr><td>Website analytics</td><td>Consent (6(1)(a)), which you can withdraw at any time</td></tr>
+      <tr><td>Marketing emails</td><td>Consent (6(1)(a)); unsubscribe at any time</td></tr>
+      <tr><td>Accounting and legal obligations</td><td>Legal obligation (6(1)(c))</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>4. Who we share it with</h2>
+  <p>We use trusted service providers (processors) who act on our instructions:</p>
+  <ul>
+    <li>Netlify (website hosting and form processing)</li>
+    <li>Supabase (secure database for enquiries and newsletter sign-ups)</li>
+    <li>Resend (email notifications)</li>
+    <li>Our analytics provider, only if you accept analytics [to confirm provider]</li>
+    <li>Cloudflare (hosting of the ADEV chat service; optional spam protection)</li>
+    <li>Voice AI and telephony providers for Mexy (for example Vapi, Telnyx and Cartesia) [to confirm list]</li>
+    <li>Stripe (payments, when you pay us)</li>
+  </ul>
+  <p>We never sell your personal data.</p>
+
+  <h2>5. International transfers</h2>
+  <p>Some providers process data outside the UK, including in the USA. Where they do, we rely on UK adequacy regulations (including the UK Extension to the EU-US Data Privacy Framework) or the UK International Data Transfer Agreement/Addendum [to confirm per provider].</p>
+
+  <h2>6. How long we keep it</h2>
+  <ul>
+    <li>Enquiries that don't become projects: up to 24 months after our last contact, then deleted [to confirm; deletion is currently a manual process].</li>
+    <li>Client records: for the length of the contract plus 6 years for tax and legal reasons.</li>
+    <li>Newsletter: while you're subscribed. If you unsubscribe, we keep your email and the date only as a suppression record so we don't email you again [to confirm].</li>
+    <li>Analytics: as set by the provider, no longer than 26 months.</li>
+  </ul>
+
+  <h2>7. Your rights</h2>
+  <p>You can ask to access, correct, delete or restrict your data, object to processing based on legitimate interests, ask for data portability, and withdraw consent at any time. Email <a href={`mailto:${company.email}`}>{company.email}</a>. We'll respond within one month.</p>
+  <p>If you're unhappy, you can complain to the Information Commissioner's Office: <a href="https://ico.org.uk/make-a-complaint/" rel="noopener">ico.org.uk</a>, 0303 123 1113.</p>
+
+  <h2>8. Automated decisions</h2>
+  <p>We don't make decisions about you with legal or similarly significant effects based solely on automated processing. Our AI assistants answer questions and take messages; people make the business decisions.</p>
+
+  <h2>9. Cookies</h2>
+  <p>See our <a href="/legal/cookies/">cookie policy</a>.</p>
+
+  <h2>10. Changes</h2>
+  <p>We'll update this page if our practices change, and show the date above.</p>
+</Legal>

@@ -1,0 +1,87 @@
+---
+/**
+ * Index of every project as big type rows. On desktop (full motion tier) a preview of the hovered
+ * project follows the cursor, leaning with its speed; rows dim except the active one.
+ * Each row is a plain link, so keyboard and touch users get the same destinations.
+ */
+import { getImage } from "astro:assets";
+import Icon from "../Icon.astro";
+import { projects } from "../../data/site";
+import mexy from "../../assets/work/mexy.jpg";
+import msbt from "../../assets/work/msbt.jpg";
+import unilink from "../../assets/work/unilink.jpg";
+import mrahaven from "../../assets/work/mrahaven.jpg";
+import toybloom from "../../assets/work/toybloom.jpg";
+import gummytraders from "../../assets/work/gummytraders.jpg";
+import jtkremovals from "../../assets/work/jtkremovals.jpg";
+import roseempire from "../../assets/work/roseempire.jpg";
+import crm from "../../assets/work/crm/roseempire-os-dash.jpg";
+const src = { mexy, msbt, unilink, roseempire, crm, mrahaven, toybloom, gummytraders, jtkremovals } as Record<string, ImageMetadata>;
+const rows = await Promise.all(projects.map(async (p) => ({ p, img: (await getImage({ src: src[p.img], width: 640, format: "webp", quality: 70 })).src })));
+---
+<div class="wl" data-worklist>
+  <ol class="wl-list" role="list">
+    {rows.map(({ p, img }, i) => (
+      <li class:list={["wl-row", p.mexy && "mexy-scope"]}>
+        <a href={`/work/${p.slug}/`} data-cursor="View case" data-img={img} data-track="work_click" data-loc={`worklist_${p.slug}`}>
+          <span class="wl-n mono">{String(i + 1).padStart(2, "0")}</span>
+          <span class="wl-name display">{p.name}</span>
+          <span class="wl-kind mono">{p.kind}</span>
+          <span class="wl-sector">{p.sector}</span>
+          <Icon name="arrowUpRight" class="wl-go" />
+        </a>
+      </li>
+    ))}
+  </ol>
+  <div class="wl-float" aria-hidden="true"><div class="wl-float-in"></div></div>
+</div>
+<style>
+  .wl { position: relative; margin-bottom: clamp(48px, 7vw, 96px); }
+  .wl-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line-2); }
+  .wl-row { border-bottom: 1px solid var(--line-2); }
+  .wl-row a { position: relative; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 6px 18px; padding: 22px 4px; color: var(--ink); text-decoration: none; transition: color 300ms, padding 500ms var(--ease); }
+  .wl-n { font-size: 0.72rem; color: var(--ink-3); letter-spacing: 0.1em; }
+  .wl-name { font-size: clamp(2.4rem, 1.6rem + 3.6vw, 5.6rem); line-height: 0.9; text-transform: uppercase; letter-spacing: 0.005em; }
+  .wl-kind { grid-column: 2; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); }
+  .wl-sector { grid-column: 2; color: var(--ink-3); font-size: 0.92rem; }
+  .wl-row :global(.wl-go) { grid-column: 3; grid-row: 1; width: 28px; height: 28px; color: var(--ink-3); transition: transform 400ms var(--ease), color 300ms; }
+  .wl-row a:hover :global(.wl-go), .wl-row a:focus-visible :global(.wl-go) { transform: translate(4px, -4px) rotate(0deg); color: var(--accent); }
+  .wl-row a:hover .wl-name { color: var(--accent-ink); }
+  @media (min-width: 900px) {
+    .wl-row a { grid-template-columns: 60px 1fr 140px 280px 40px; padding: 26px 8px; }
+    .wl-kind, .wl-sector { grid-column: auto; }
+    .wl-row :global(.wl-go) { grid-column: auto; grid-row: auto; }
+    .wl-row a:hover { padding-left: 22px; }
+  }
+  :global(html[data-motion="full"]) .wl-list:hover .wl-row a:not(:hover) { color: var(--ink-3); }
+  :global(html[data-motion="full"]) .wl-list:hover .wl-row a:not(:hover) .wl-name { color: var(--ink-3); }
+  .wl-float { position: fixed; left: 0; top: 0; z-index: 30; width: 360px; aspect-ratio: 16 / 10; pointer-events: none; opacity: 0; scale: 0.6; transition: opacity 300ms, scale 500ms var(--ease); }
+  .wl-float.is-on { opacity: 1; scale: 1; }
+  .wl-float-in { width: 100%; height: 100%; border-radius: 14px; background: #111 center / cover no-repeat; box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.9); border: 1px solid rgb(255 255 255 / 0.12); }
+  :global(html:not([data-motion="full"])) .wl-float { display: none; }
+</style>
+<script>
+  const root = document.querySelector<HTMLElement>("[data-worklist]");
+  if (root && document.documentElement.dataset.motion === "full") {
+    const fl = root.querySelector<HTMLElement>(".wl-float")!, inner = fl.firstElementChild as HTMLElement;
+    let x = 0, y = 0, tx = 0, ty = 0, vx = 0, raf = 0, on = false;
+    const loaded = new Set<string>();
+    const tick = () => {
+      const nx = x + (tx - x) * 0.14, ny = y + (ty - y) * 0.14; vx = nx - x; x = nx; y = ny;
+      fl.style.transform = `translate3d(${x - 180}px, ${y - 112}px, 0) rotate(${Math.max(-10, Math.min(10, vx * 0.6))}deg)`;
+      raf = on || Math.abs(tx - x) > 0.5 ? requestAnimationFrame(tick) : 0;
+    };
+    root.querySelectorAll<HTMLAnchorElement>("a[data-img]").forEach((a) => {
+      a.addEventListener("pointerenter", (e) => {
+        if (e.pointerType !== "mouse") return;
+        const u = a.dataset.img!;
+        if (!loaded.has(u)) { const im = new Image(); im.src = u; loaded.add(u); }
+        inner.style.backgroundImage = `url("${u}")`;
+        if (!on) { x = tx = e.clientX; y = ty = e.clientY; }
+        on = true; fl.classList.add("is-on"); if (!raf) raf = requestAnimationFrame(tick);
+      });
+    });
+    root.addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+    root.querySelector(".wl-list")!.addEventListener("pointerleave", () => { on = false; fl.classList.remove("is-on"); });
+  }
+</script>

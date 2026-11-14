@@ -1,0 +1,30 @@
+---
+/**
+ * USD / GBP price switch. The active state comes from <html data-currency> (set by the edge function from the
+ * visitor's country, or by the amx_cur cookie), so it is right on first paint. Choosing saves amx_cur for a year.
+ * Logic: src/scripts/currency.ts.
+ */
+interface Props { id: string; class?: string; label?: string }
+const { id, class: cls, label = "Prices in" } = Astro.props;
+---
+<div class:list={["cur-switch", cls]} data-cur-switch data-pagefind-ignore>
+  <span class="cs-lab" id={`${id}-l`}>{label}</span>
+  <div class="cs-seg" role="radiogroup" aria-labelledby={`${id}-l`}>
+    <label><input type="radio" name={id} value="USD" checked /><span><b aria-hidden="true">$</b> USD</span></label>
+    <label><input type="radio" name={id} value="GBP" /><span><b aria-hidden="true">£</b> GBP</span></label>
+  </div>
+</div>
+<style>
+  .cur-switch { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .cs-lab { font-family: var(--mono); font-size: var(--fs-xs, 0.75rem); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+  .cs-seg { display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--bg-2); }
+  .cs-seg label { position: relative; display: block; }
+  .cs-seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .cs-seg span { display: flex; align-items: center; gap: 5px; min-height: 30px; padding: 0 13px; border-radius: 999px; font-family: var(--mono); font-size: 0.8rem; font-weight: 560; letter-spacing: 0.02em; color: var(--ink-2); transition: background-color var(--t-fast, 0.15s), color var(--t-fast, 0.15s); }
+  .cs-seg b { font-weight: 600; }
+  .cs-seg label:hover span { color: var(--ink); }
+  /* Active option follows <html data-currency>, so it is correct before any script runs. */
+  :global(html:not([data-currency="GBP"])) .cs-seg input[value="USD"] + span,
+  :global(html[data-currency="GBP"]) .cs-seg input[value="GBP"] + span { background: var(--accent); color: var(--on-accent); }
+  .cs-seg input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+</style>

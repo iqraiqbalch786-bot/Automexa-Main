@@ -1,0 +1,61 @@
+---
+/**
+ * Floating "Contact us". Desktop: a pill bottom-left (the ADEV chat sits bottom-right).
+ * Mobile: the quick-action bar's first button opens the same sheet, so nothing stacks on top of the Mexy call bar.
+ * Uses the native Popover API (light dismiss + Esc), with focus moved into the sheet on open.
+ */
+import Icon from "../Icon.astro";
+import CopyButton from "./CopyButton.astro";
+import { company } from "../../data/site";
+---
+<button type="button" class="cdock" popovertarget="contact-sheet" aria-haspopup="dialog" data-track="contact_dock_open" data-loc="floating"><Icon name="mail" /><span>Contact us</span></button>
+<div id="contact-sheet" class="csheet" popover role="dialog" aria-labelledby="csheet-t" data-csheet>
+  <div class="cs-head">
+    <p class="cs-title" id="csheet-t">Contact us</p>
+    <button type="button" class="cs-x" popovertarget="contact-sheet" popovertargetaction="hide" aria-label="Close contact options"><Icon name="close" /></button>
+  </div>
+  <a class="btn btn-primary btn-block" href="/contact/" data-track="cta_click" data-loc="contact_sheet"><span>Book my free 15-minute call</span><Icon name="arrowRight" class="arrow" /></a>
+  <ul class="cs-list" role="list">
+    <li>
+      <a href={`tel:${company.phone.tel}`} data-track="call_click" data-loc="contact_sheet"><Icon name="phone" /><span><strong>{company.phone.display}</strong><small>Call the team</small></span></a>
+      <CopyButton value={company.phone.intl} label="phone number" />
+    </li>
+    <li>
+      <a href={`mailto:${company.email}`} data-track="email_click" data-loc="contact_sheet"><Icon name="mail" /><span><strong>{company.email}</strong><small>Email us</small></span></a>
+      <CopyButton value={company.email} label="email address" />
+    </li>
+    <li>
+      <a href={company.whatsapp} target="_blank" rel="noopener" data-track="whatsapp_click" data-loc="contact_sheet"><Icon name="whatsapp" /><span><strong>WhatsApp</strong><small>Message us</small></span></a>
+    </li>
+  </ul>
+</div>
+<style>
+  .cdock { display: none; }
+  @media (min-width: 760px) {
+    .cdock { position: fixed; z-index: 40; left: 24px; bottom: 24px; display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px 0 14px; border-radius: 999px; background: var(--gold); color: #0a0a09; font-weight: 600; font-size: 0.94rem; box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.55); transition: transform var(--t-fast) var(--ease), background-color var(--t-fast), box-shadow var(--t) var(--ease), opacity var(--t); }
+    .cdock :global(.icon) { width: 20px; height: 20px; }
+    .cdock:hover { background: var(--gold-bright); transform: translateY(-2px); box-shadow: 0 16px 34px -12px rgb(212 175 55 / 0.5); }
+    :global(html.consent-open) .cdock { opacity: 0; pointer-events: none; }
+  }
+  .csheet { position: fixed; inset: auto 10px calc(84px + env(safe-area-inset-bottom)) 10px; margin: 0; width: auto; max-width: none; padding: 18px; border-radius: 22px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); box-shadow: var(--shadow-2); display: none; gap: 14px; }
+  .csheet:popover-open { display: grid; }
+  @media (min-width: 760px) { .csheet { inset: auto auto 84px 24px; width: 360px; } }
+  .csheet::backdrop { background: rgb(0 0 0 / 0.35); }
+  @media (prefers-reduced-motion: no-preference) {
+    .csheet:popover-open { animation: cs-in 220ms var(--ease); }
+    @keyframes cs-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } }
+  }
+  .cs-head { display: flex; justify-content: space-between; align-items: center; }
+  .cs-title { font-weight: 650; font-size: 1.1rem; letter-spacing: -0.01em; }
+  .cs-x { width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; color: var(--ink-2); transition: background-color var(--t-fast), color var(--t-fast); }
+  .cs-x:hover { background: rgb(255 255 255 / 0.08); color: var(--ink); }
+  .cs-x :global(.icon) { width: 20px; height: 20px; }
+  .cs-list { display: grid; gap: 2px; }
+  .cs-list li { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--line); }
+  .cs-list a { flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 6px; text-decoration: none; border-radius: 12px; transition: background-color var(--t-fast); min-width: 0; }
+  .cs-list a:hover { background: rgb(255 255 255 / 0.05); }
+  .cs-list a > :global(.icon) { width: 20px; height: 20px; color: var(--accent-ink); flex: none; }
+  .cs-list strong { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .cs-list small { display: block; color: var(--ink-3); font-size: 0.82rem; }
+  @media print { .cdock, .csheet { display: none !important; } }
+</style>

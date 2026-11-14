@@ -1,0 +1,36 @@
+---
+import Legal from "../../layouts/Legal.astro";
+---
+<Legal title="Cookie policy" path="/legal/cookies/" updated="8 October 2026" description="Which cookies and similar storage the Automexa website uses, and how to change your choice.">
+  <p>We only use storage that's strictly necessary, unless you say yes. Nothing optional is set before you choose, and rejecting is as easy as accepting.</p>
+  <h2>What we use</h2>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Storage we use"><table>
+    <thead><tr><th>Name</th><th>Type</th><th>Purpose</th><th>When</th><th>Duration</th></tr></thead>
+    <tbody>
+      <tr><td><code>amx-consent-v1</code></td><td>Local storage</td><td>Remembers your analytics choice</td><td>Strictly necessary</td><td>Until you clear it</td></tr>
+      <tr><td><code>amx_cur</code></td><td>Cookie</td><td>Remembers the currency you picked for prices (pounds or dollars)</td><td>Only if you use the currency switch; strictly necessary for the choice you made</td><td>1 year</td></tr>
+      <tr><td><code>amx-ft</code></td><td>Session storage</td><td>Remembers how you arrived (campaign tags) so an enquiry can be attributed</td><td>Only if you accept analytics</td><td>Until you close the tab</td></tr>
+      <tr><td>Campaign tags in links (<code>utm_*</code>, <code>amx_ref</code>)</td><td>Page address only (nothing stored on your device)</td><td>If you arrive from a tagged link, we keep the tags on links within this site so an enquiry or sign-up can be attributed</td><td>Only for visits that arrive with campaign tags</td><td>Ends when you leave the site</td></tr>
+      <tr><td>Analytics cookies (for example <code>_ga</code>, <code>_ga_*</code>)</td><td>Cookie</td><td>Measures site usage</td><td>Only if you accept analytics, and only if we use Google Analytics [to confirm provider]</td><td>Up to 13 months</td></tr>
+      <tr><td>ADEV chat storage (keys beginning <code>adev</code>)</td><td>Local storage</td><td>Keeps your chat conversation and widget position</td><td>Only after you open the chat</td><td>Until you clear it</td></tr>
+      <tr><td>Cloudflare Turnstile</td><td>Cookie / storage</td><td>Spam protection on forms</td><td>Only if enabled; strictly necessary for security</td><td>Session</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Change your mind</h2>
+  <p>Use the <strong>Cookie settings</strong> link in the footer of any page, or clear this site's data in your browser.</p>
+  <p>To start again, reset your choices. We'll forget your analytics choice and any stored campaign tags, and ask you again.</p>
+  <p><button type="button" class="btn btn-ghost" data-reset-consent>Reset my cookie choices</button></p>
+  <p class="reset-status" role="status" aria-live="polite" data-reset-status></p>
+  <script>
+    import { confirmAction } from "../../scripts/ui/chrome";
+    const btn = document.querySelector<HTMLButtonElement>("[data-reset-consent]");
+    const status = document.querySelector<HTMLElement>("[data-reset-status]");
+    btn?.addEventListener("click", async () => {
+      const ok = await confirmAction({ title: "Reset your cookie choices?", body: "We'll forget your analytics choice and any campaign tags stored for this visit, then ask you again. Analytics stays off until you choose.", confirm: "Reset choices" });
+      if (!ok) return;
+      try { localStorage.removeItem("amx-consent-v1"); sessionStorage.removeItem("amx-ft"); } catch { /* storage blocked */ }
+      if (status) status.textContent = "Done. Your choices were reset. Choose again in the banner below.";
+      document.querySelector<HTMLElement>("[data-consent-open]")?.click();
+    });
+  </script>
+</Legal>

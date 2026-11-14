@@ -1,0 +1,53 @@
+---
+import Icon from "./Icon.astro";
+import type { Plan } from "../data/site";
+import { moneyText } from "../lib/currency.mjs";
+interface Props { plan: Plan; }
+const { plan } = Astro.props;
+const href = `/contact/?plan=${encodeURIComponent(plan.name)}`;
+---
+<article class:list={["plan", plan.badge && "featured", plan.id === "mexy-crm" && "mexy-scope is-mexy"]} data-plan={plan.id} data-checkout-mode={plan.checkout.mode} data-spotlight>
+  <header>
+    <div class="plan-top">
+      <h3 class="plan-name">{plan.name}</h3>
+      {plan.badge && <span class="pill accent">{plan.badge}</span>}
+    </div>
+    <p class="plan-outcome">{plan.outcome}</p>
+    <p class="plan-price">{plan.pricePrefix && <span class="note pre">{plan.pricePrefix}</span>}<span class="amt" set:html={moneyText(plan.price)} /> <span class="note" set:html={moneyText(plan.priceKey ? `${plan.priceNote}{{gbp: + VAT}}` : plan.priceNote)} /></p>
+    {plan.monthly && <p class="plan-monthly" set:html={moneyText(plan.monthly)} />}
+  </header>
+  <div class="plan-body">
+    <ul class="points" role="list">
+      {plan.features.slice(0, 3).map((f) => <li><Icon name="check" /><span set:html={moneyText(f)} /></li>)}
+    </ul>
+    {plan.features.length > 3 && (
+      <details class="plan-more">
+        <summary><span>See everything included</span><Icon name="plus" /></summary>
+        <ul class="points" role="list">{plan.features.slice(3).map((f) => <li><Icon name="check" /><span set:html={moneyText(f)} /></li>)}</ul>
+      </details>
+    )}
+  </div>
+  <a class:list={["btn", plan.badge || plan.id === "mexy-crm" ? "btn-primary" : "btn-ghost", "btn-block"]} href={href} data-track="cta_click" data-loc={`pricing_${plan.id}`}><span>{plan.cta}</span><span class="sr-only"> ({plan.name})</span><Icon name="arrowRight" class="arrow" /></a>
+</article>
+<style>
+  .plan { display: flex; flex-direction: column; gap: 22px; background: linear-gradient(180deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.01)), var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(22px, 3vw, 30px); }
+  .plan.featured { border-color: var(--accent-line); box-shadow: 0 0 0 1px var(--accent-line), var(--shadow-2); }
+  .plan.is-mexy { border-color: var(--accent-line); }
+  .plan-name::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 10px; vertical-align: 1px; }
+  .plan-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .plan-name { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+  .plan-outcome { color: var(--ink-3); font-size: 0.93rem; margin-top: 4px; }
+  .plan-price { margin-top: 18px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .amt { font-size: 2.4rem; font-weight: 650; letter-spacing: -0.045em; line-height: 1; }
+  .note { color: var(--ink-3); font-size: 0.9rem; }
+  .plan-monthly { font-weight: 600; margin-top: 6px; }
+  .plan-body { flex: 1; display: grid; gap: 12px; align-content: start; }
+  .plan .points { align-content: start; font-size: 0.93rem; color: var(--ink-2); }
+  .plan-more summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 560; color: var(--accent-ink); padding: 6px 0; border-radius: 6px; transition: color var(--t-fast); }
+  .plan-more summary::-webkit-details-marker { display: none; }
+  .plan-more summary:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .plan-more summary :global(.icon) { width: 14px; height: 14px; transition: transform var(--t-fast); }
+  .plan-more[open] summary :global(.icon) { transform: rotate(45deg); }
+  .plan-more .points { margin-top: 8px; }
+  .plan .btn { margin-top: auto; white-space: normal; text-align: center; }
+</style>

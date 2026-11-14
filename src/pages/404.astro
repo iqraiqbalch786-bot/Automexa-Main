@@ -1,0 +1,79 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import { company } from "../data/site";
+const routes = [
+  { i: "browser", t: "Services", s: "Websites, SEO, ads, automation and brand", href: "/services/" },
+  { i: "eye", t: "Client work", s: "Open the projects we've built", href: "/work/" },
+  { i: "coins", t: "Pricing", s: "Fixed prices, in writing", href: "/pricing/" },
+  { i: "phoneIn", t: "Mexy", s: "Our AI receptionist, with a live demo line", href: "/mexy/" },
+] as const;
+---
+<Base title="Page not found" description="This page doesn't exist or has moved. Search the site or pick a popular page." noindex>
+  <section class="page-hero nf">
+    <div class="wrap nf-grid">
+      <div class="nf-copy">
+        <p class="marker">Error 404</p>
+        <h1 class="h1">We couldn't find that <span class="acc">page.</span></h1>
+        <p class="lead">It may have moved, or the link has a typo. Search for it, or pick one of the pages most people need.</p>
+        <div class="nf-search">
+          <button type="button" class="nf-sbtn" data-search-open data-nf-search><Icon name="search" /><span>Search the site</span><kbd class="mono">/</kbd></button>
+        </div>
+        <p class="nf-path mono" data-nf-path></p>
+      </div>
+      <p class="nf-num display" aria-hidden="true">404</p>
+    </div>
+    <div class="wrap">
+      <ul class="nf-links" role="list">
+        {routes.map((r) => (
+          <li><a href={r.href}><span class="icon-tile accent"><Icon name={r.i} /></span><span class="nf-t"><strong>{r.t}</strong><span>{r.s}</span></span><Icon name="arrowRight" class="go" /></a></li>
+        ))}
+      </ul>
+      <div class="nf-help card">
+        <div><p class="nf-ht">Looking for something specific?</p><p class="muted">Tell us what you were after and we'll point you to it.</p></div>
+        <div class="nf-acts">
+          <a class="btn btn-primary" href="/contact/" data-track="cta_click" data-loc="404"><span>Ask us directly</span><Icon name="arrowRight" class="arrow" /></a>
+          <a class="btn btn-ghost" href={`tel:${company.phone.tel}`} data-track="call_click" data-loc="404"><Icon name="phone" /><span>{company.phone.display}</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { padding-bottom: var(--section); }
+  .nf-grid { display: grid; gap: 24px; align-items: center; }
+  @media (min-width: 960px) { .nf-grid { grid-template-columns: 1.3fr 1fr; } }
+  .nf-num { font-size: clamp(9rem, 6rem + 14vw, 20rem); line-height: 0.8; color: transparent; -webkit-text-stroke: 2px var(--accent); text-align: center; opacity: 0.9; user-select: none; }
+  @media (max-width: 959px) { .nf-num { display: none; } }
+  .nf-search { margin-top: 28px; }
+  .nf-sbtn { display: inline-flex; align-items: center; gap: 12px; width: min(100%, 460px); height: 56px; padding: 0 14px 0 18px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line-2); color: var(--ink-3); font-size: 1rem; text-align: left; transition: border-color var(--t-fast), background-color var(--t-fast), color var(--t-fast); }
+  .nf-sbtn span { flex: 1; }
+  .nf-sbtn:hover { border-color: var(--accent); color: var(--ink); background: var(--surface-2); }
+  .nf-sbtn :global(.icon) { width: 20px; height: 20px; color: var(--accent-ink); }
+  .nf-sbtn kbd { font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--line-2); }
+  .nf-path { margin-top: 14px; min-height: 1.5em; font-size: 0.78rem; color: var(--ink-3); overflow-wrap: anywhere; }
+  .nf-links { display: grid; gap: 12px; margin-top: clamp(40px, 6vw, 72px); }
+  @media (min-width: 720px) { .nf-links { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .nf-links { grid-template-columns: repeat(4, 1fr); } }
+  .nf-links a { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; height: 100%; padding: 20px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); text-decoration: none; transition: border-color var(--t), transform var(--t) var(--ease); }
+  .nf-links a:hover { border-color: var(--accent-line); transform: translateY(-2px); }
+  .nf-t { display: grid; gap: 2px; }
+  .nf-t span { font-size: 0.86rem; color: var(--ink-3); }
+  .nf-links :global(.go) { width: 18px; height: 18px; color: var(--ink-3); transition: transform var(--t) var(--ease), color var(--t); }
+  .nf-links a:hover :global(.go) { transform: translateX(3px); color: var(--accent-ink); }
+  .nf-help { margin-top: 16px; display: grid; gap: 16px; align-items: center; }
+  @media (min-width: 860px) { .nf-help { grid-template-columns: 1fr auto; } }
+  .nf-ht { font-weight: 650; font-size: 1.1rem; }
+  .nf-acts { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>
+<script>
+  // Show the address that failed and prefill search with its words (e.g. /servces/seo/ -> "servces seo").
+  const isSelf = /^\/404(\.html|\/)?$/.test(location.pathname);
+  const words = decodeURIComponent(location.pathname).replace(/[/_-]+/g, " ").trim().slice(0, 60);
+  const path = document.querySelector<HTMLElement>("[data-nf-path]");
+  if (path && !isSelf) path.textContent = `Not found: ${location.pathname.slice(0, 120)}`;
+  document.querySelector("[data-nf-search]")?.addEventListener("click", () => {
+    const input = document.querySelector<HTMLInputElement>("[data-search-input]");
+    if (input && !input.value && words && !isSelf) { input.value = words; }
+  });
+</script>

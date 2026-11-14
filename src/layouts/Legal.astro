@@ -1,0 +1,29 @@
+---
+import Base from "./Base.astro";
+import Icon from "../components/Icon.astro";
+import { SITE_URL } from "../data/site";
+interface Props { title: string; description: string; path: string; updated: string; }
+const { title, description, path, updated } = Astro.props;
+const iso = new Date(`${updated} 12:00 UTC`).toISOString().slice(0, 10);
+const ld = [{ "@context": "https://schema.org", "@type": "WebPage", name: title, url: `${SITE_URL}${path}`, dateModified: iso, publisher: { "@id": `${SITE_URL}/#org` } }];
+---
+<Base title={title} description={description} jsonLd={ld} crumbs={[{ name: "Legal", href: "/legal/privacy/" }, { name: title, href: path }]}>
+  <section class="page-hero legal-hero">
+    <div class="wrap-narrow">
+      <p class="marker">Legal</p>
+      <h1 class="h1">{title}</h1>
+      <p class="muted">Last updated: <time datetime={iso}>{updated}</time></p>
+      <div class="notice" role="note"><Icon name="alert" /><p><strong>Draft for legal review.</strong> This document was prepared in good faith to meet UK GDPR, PECR and consumer-law expectations, but it has not yet been reviewed by a solicitor. Items marked [to confirm] need the owner's input.</p></div>
+    </div>
+  </section>
+  <section class="section-tight legal-body">
+    <div class="wrap-narrow prose"><slot /></div>
+  </section>
+</Base>
+<style>
+  .legal-hero .h1 { max-width: none; }
+  .legal-hero .muted { margin-top: 12px; }
+  .legal-hero .notice { margin-top: 24px; }
+  .legal-body { padding-top: 0; }
+  nav.legal-nav { margin-top: 24px; }
+</style>

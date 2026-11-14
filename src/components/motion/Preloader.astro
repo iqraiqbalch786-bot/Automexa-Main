@@ -1,0 +1,42 @@
+---
+/**
+ * Branded intro, home page only, first entry only (html.intro is set by the boot script when the
+ * visitor didn't come from another Automexa page). Pure CSS: no JS needed to run or to exit, so it can
+ * never trap the page. ~1.7 s total. Skipped under reduced motion, Save-Data and low-power devices.
+ * The hero poster underneath paints at first paint, so LCP is not delayed by the overlay.
+ */
+const words = ["Websites", "SEO", "Ads", "AI agents", "Automexa"];
+---
+<div class="pl" aria-hidden="true">
+  <div class="pl-top mono"><span>Automexa · Growth partner</span><span class="pl-count"></span></div>
+  <div class="pl-words display">
+    {words.map((w, i) => <span class:list={["pl-w", i === words.length - 1 && "pl-last"]} style={`--i:${i}`}>{w}</span>)}
+  </div>
+  <div class="pl-bot mono"><span>Manchester, UK</span><span>Websites, search, ads and AI</span></div>
+  <div class="pl-bar"><i></i></div>
+</div>
+<style>
+  @property --pl-n { syntax: "<integer>"; inherits: false; initial-value: 0; }
+  .pl { display: none; }
+  :global(html.intro) .pl {
+    display: block; position: fixed; inset: 0; z-index: 400; background: #0a0a09; color: #f5f2ea; pointer-events: none;
+    animation: pl-out 760ms cubic-bezier(0.76, 0, 0.24, 1) 1250ms forwards;
+  }
+  .pl-top, .pl-bot { position: absolute; left: var(--gutter); right: var(--gutter); display: flex; justify-content: space-between; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .pl-top { top: 24px; } .pl-bot { bottom: 30px; }
+  .pl-count { counter-reset: n var(--pl-n); color: var(--gold); font-variant-numeric: tabular-nums; animation: pl-count 1150ms cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+  .pl-count::after { content: counter(n, decimal-leading-zero) "%"; }
+  .pl-words { position: absolute; inset: 0; display: grid; place-items: center; }
+  .pl-w { grid-area: 1 / 1; font-size: clamp(4.5rem, 15vw, 15rem); line-height: 0.82; text-transform: uppercase; letter-spacing: 0.01em; clip-path: inset(0 0 100% 0); transform: translateY(40%);
+    animation: pl-word 260ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 230ms + 60ms) both, pl-word-out 200ms ease-in calc(var(--i) * 230ms + 290ms) forwards; }
+  .pl-last { color: var(--gold); animation: pl-word 320ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 230ms + 60ms) both; }
+  .pl-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgb(255 255 255 / 0.06); }
+  .pl-bar i { display: block; height: 100%; background: var(--gold); transform-origin: 0 50%; transform: scaleX(0); animation: pl-bar 1150ms cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+  @keyframes pl-count { to { --pl-n: 100; } }
+  @keyframes pl-bar { to { transform: scaleX(1); } }
+  @keyframes pl-word { to { clip-path: inset(0 0 0 0); transform: none; } }
+  @keyframes pl-word-out { to { clip-path: inset(0 0 0 0); transform: translateY(-30%); opacity: 0; } }
+  @keyframes pl-out { 0% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 0 100% 0); visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) { :global(html.intro) .pl { display: none; } }
+  @media print { .pl { display: none !important; } }
+</style>

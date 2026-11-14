@@ -1,0 +1,24 @@
+---
+/** Primary CTA: rings the live Mexy demo line. Tracked as demo_call_click. */
+import Icon from "./Icon.astro";
+import { company } from "../data/site";
+interface Props { location: string; size?: "md" | "lg"; label?: string; showSub?: boolean; }
+const { location, size = "lg", label = "Call Mexy now", showSub = true } = Astro.props;
+// GBP visitors (UK) see the Manchester line, everyone else the US line; CSS picks via <html data-currency>.
+const lines = [
+  { cur: "USD", l: company.mexyLine, tag: "US line" },
+  { cur: "GBP", l: company.mexyLineUK, tag: "UK line" },
+] as const;
+---
+<div class="callmexy mexy-scope">
+  {lines.map(({ cur, l, tag }) => (
+    <Fragment>
+      <a href={`tel:${l.tel}`} class:list={["btn", "btn-primary", "btn-call", "cur-v", size === "lg" && "btn-lg"]} data-cur={cur} data-track="demo_call_click" data-loc={cur === "GBP" ? `${location}_uk` : location} aria-describedby={showSub ? `cm-${location}-${cur}` : undefined}>
+        <span class="ring"><Icon name="phone" /></span>
+        <span>{label}</span>
+      </a>
+      {showSub && <span class="cta-sub cur-v" data-cur={cur} id={`cm-${location}-${cur}`}>Live AI demo · {l.display} ({tag})</span>}
+    </Fragment>
+  ))}
+</div>
+<style>.callmexy { display: grid; justify-items: start; }</style>

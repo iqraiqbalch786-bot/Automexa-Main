@@ -1,0 +1,101 @@
+---
+/**
+ * Newsletter sign-up. Posts to /api/newsletter (Supabase marketing_newsletter, consent recorded with its wording).
+ * Real success state only on HTTP 201; real errors otherwise. Opt-in box is never pre-ticked (PECR).
+ */
+import Icon from "./Icon.astro";
+interface Props { id?: string; source?: string; }
+const { id = "nl", source = "footer" } = Astro.props;
+const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT || "/api/newsletter";
+---
+<div class="nl" data-newsletter data-endpoint={endpoint} data-source={source}>
+  <div class="nl-copy">
+    <p class="nl-t" id={`${id}-t`}>Growth ideas for established businesses</p>
+    <p class="nl-s">Practical ways to win more customers, from the work we do for clients. Unsubscribe from any email.</p>
+  </div>
+  <form class="nl-form" novalidate aria-labelledby={`${id}-t`}>
+    <div class="nl-row">
+      <label for={`${id}-email`} class="sr-only">Email address</label>
+      <input id={`${id}-email`} name="email" type="email" autocomplete="email" inputmode="email" required maxlength="254" placeholder="you@business.com" aria-describedby={`${id}-err`} />
+      <button class="btn btn-primary" type="submit" data-nl-submit><span class="lbl">Send me growth ideas</span><span class="spin" aria-hidden="true"></span></button>
+    </div>
+    <div class="nl-hp" aria-hidden="true"><label for={`${id}-hp`}>Leave this empty</label><input id={`${id}-hp`} name="company_url" type="text" tabindex="-1" autocomplete="off" /></div>
+    <label class="nl-cb"><input type="checkbox" name="consent" required aria-describedby={`${id}-err`} /><span>Yes, email me Automexa's growth ideas. I can unsubscribe at any time. See our <a href="/legal/privacy/">privacy policy</a>.</span></label>
+    <p class="nl-err" id={`${id}-err`} role="alert" data-nl-err></p>
+  </form>
+  <div class="nl-done" data-nl-done hidden tabindex="-1">
+    <span class="icon-tile accent"><Icon name="check" /></span>
+    <div><p class="nl-t">You're subscribed.</p><p class="nl-s">We'll send our next growth idea to <strong data-nl-email></strong>. Every email has an unsubscribe link.</p></div>
+  </div>
+</div>
+<style>
+  .nl { display: grid; gap: 18px; padding: clamp(22px, 3vw, 32px); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
+  @media (min-width: 960px) { .nl { grid-template-columns: 1fr 1.2fr; align-items: center; gap: 40px; } }
+  .nl-t { font-weight: 650; font-size: 1.1rem; color: var(--ink); letter-spacing: -0.01em; }
+  .nl-s { color: var(--ink-3); font-size: 0.92rem; margin-top: 4px; }
+  .nl-form { display: grid; gap: 10px; }
+  .nl-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nl-row input { flex: 1 1 220px; min-width: 0; height: 52px; padding: 0 18px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line-2); color: var(--ink); transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+  .nl-row input:hover { border-color: rgb(255 255 255 / 0.32); }
+  .nl-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .nl-row input[aria-invalid="true"] { border-color: var(--danger); }
+  .nl-row .btn { flex: 0 0 auto; }
+  @media (max-width: 480px) { .nl-row .btn { flex: 1 1 100%; } }
+  .nl-cb { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 0.86rem; color: var(--ink-2); cursor: pointer; }
+  .nl-cb input { width: 22px; height: 22px; margin-top: 0; accent-color: var(--gold); cursor: pointer; }
+  .nl-cb a { color: var(--accent-ink); }
+  .nl-err { color: var(--danger); font-size: 0.86rem; min-height: 0; }
+  .nl-err:empty { display: none; }
+  .nl-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .nl .spin { display: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: nlspin 700ms linear infinite; }
+  [data-nl-submit][aria-busy="true"] .spin { display: inline-block; }
+  [data-nl-submit][aria-busy="true"] { opacity: 0.85; cursor: progress; }
+  @keyframes nlspin { to { transform: rotate(360deg); } }
+  .nl-done { display: flex; gap: 14px; align-items: flex-start; }
+  .nl-done[hidden] { display: none; }
+  .nl-done strong { color: var(--ink); overflow-wrap: anywhere; }
+  @media (prefers-reduced-motion: no-preference) { .nl-done:not([hidden]) { animation: nl-in 360ms var(--ease); } @keyframes nl-in { from { opacity: 0; transform: translateY(6px); } } }
+</style>
+<script>
+  import { getAttribution, track } from "../scripts/analytics";
+  import { getReferrer } from "../scripts/attribution";
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  document.querySelectorAll<HTMLElement>("[data-newsletter]").forEach((root) => {
+    const form = root.querySelector("form")!;
+    const err = root.querySelector<HTMLElement>("[data-nl-err]")!;
+    const btn = root.querySelector<HTMLButtonElement>("[data-nl-submit]")!;
+    const email = form.querySelector<HTMLInputElement>("[name=email]")!;
+    const consent = form.querySelector<HTMLInputElement>("[name=consent]")!;
+    const started = Date.now();
+    const fail = (msg: string, el?: HTMLInputElement) => { err.textContent = msg; if (el) { el.setAttribute("aria-invalid", "true"); el.focus(); } };
+    form.addEventListener("input", () => { email.removeAttribute("aria-invalid"); consent.removeAttribute("aria-invalid"); if (err.textContent) err.textContent = ""; });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); err.textContent = "";
+      const v = email.value.trim();
+      if (!v) return fail("Please enter your email address.", email);
+      if (!EMAIL.test(v)) return fail("That email doesn't look right. Please check it.", email);
+      if (!consent.checked) return fail("Please tick the box to confirm you want our emails.", consent);
+      btn.setAttribute("aria-busy", "true"); btn.disabled = true; btn.querySelector(".lbl")!.textContent = "Subscribing…";
+      try {
+        const res = await fetch(root.dataset.endpoint!, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+          email: v, consent: true, source: root.dataset.source, page: location.pathname, referrer: getReferrer(), utm: getAttribution(),
+          company_url: (form.querySelector<HTMLInputElement>("[name=company_url]")!).value, elapsed_ms: Date.now() - started,
+        }) });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 201 && data.ok) {
+          track("newsletter_signup", { source: root.dataset.source });
+          root.querySelector("[data-nl-email]")!.textContent = v;
+          form.hidden = true; const done = root.querySelector<HTMLElement>("[data-nl-done]")!; done.hidden = false; done.focus();
+          return;
+        }
+        throw new Error(data.error || `HTTP ${res.status}`);
+      } catch (x) {
+        const m = (x as Error).message;
+        fail(`Sorry, that didn't work. ${m && !m.startsWith("HTTP") && !m.includes("fetch") ? m + " " : ""}Nothing was saved. Please try again, or email info@automexa.co.uk.`);
+        track("newsletter_error", { reason: m.slice(0, 60) });
+      } finally {
+        btn.removeAttribute("aria-busy"); btn.disabled = false; btn.querySelector(".lbl")!.textContent = "Send me growth ideas";
+      }
+    });
+  });
+</script>

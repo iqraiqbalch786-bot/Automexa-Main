@@ -1,0 +1,286 @@
+---
+/**
+ * Discovery-call / contact form.
+ * Posts JSON to PUBLIC_LEAD_ENDPOINT (Netlify Function /api/lead → Supabase marketing_leads + email alert).
+ * Honest states: inline validation, real success only on HTTP 201, real error with fallbacks otherwise.
+ */
+import Icon from "./Icon.astro";
+import { company } from "../data/site";
+import { budgetBands } from "../lib/currency.mjs";
+interface Props { form?: "discovery" | "contact"; id?: string; }
+const { form = "discovery", id = "lead" } = Astro.props;
+const endpoint = import.meta.env.PUBLIC_LEAD_ENDPOINT || "/api/lead";
+const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+const interests = ["Website or landing page", "Ads", "SEO / AEO / GEO", "Automation, CRM & AI agents", "AI receptionist (Mexy)", "Brand & design", "Not sure yet"];
+// Budget bands follow the visitor's currency (see the script below and src/lib/currency.mjs).
+const usdBands = budgetBands("USD"), gbpBands = budgetBands("GBP");
+---
+<div class="lf" data-leadform data-endpoint={endpoint} data-form={form} data-turnstile={turnstileKey || undefined}>
+  <form id={id} novalidate>
+    <div class="lf-grid">
+      <div class="f">
+        <label for={`${id}-name`}>Your name <span class="req" aria-hidden="true">*</span></label>
+        <input id={`${id}-name`} name="name" type="text" autocomplete="name" required maxlength="120" aria-describedby={`${id}-name-err`} />
+        <p class="err" id={`${id}-name-err`} data-err="name"></p>
+      </div>
+      <div class="f">
+        <label for={`${id}-email`}>Work email <span class="req" aria-hidden="true">*</span></label>
+        <input id={`${id}-email`} name="email" type="email" autocomplete="email" required maxlength="254" inputmode="email" aria-describedby={`${id}-email-err`} />
+        <p class="err" id={`${id}-email-err`} data-err="email"></p>
+      </div>
+      <div class="f">
+        <label for={`${id}-phone`}>Phone <span class="opt">optional</span></label>
+        <input id={`${id}-phone`} name="phone" type="tel" autocomplete="tel" maxlength="40" inputmode="tel" aria-describedby={`${id}-phone-err`} />
+        <p class="err" id={`${id}-phone-err`} data-err="phone"></p>
+      </div>
+      <div class="f">
+        <label for={`${id}-company`}>Business name <span class="opt">optional</span></label>
+        <input id={`${id}-company`} name="company" type="text" autocomplete="organization" maxlength="160" />
+      </div>
+    </div>
+
+    <fieldset class="f chips">
+      <legend>What do you want to grow? <span class="opt">pick any</span></legend>
+      <div class="chip-row">
+        {interests.map((i) => <label class="chip"><input type="checkbox" name="interests" value={i} /><span><Icon name="check" />{i}</span></label>)}
+      </div>
+    </fieldset>
+
+    <div class="lf-grid">
+      <div class="f">
+        <label for={`${id}-budget`}>Rough budget <span class="opt">optional</span></label>
+        <select id={`${id}-budget`} name="budget">
+          <option value="">Choose…</option>
+          {usdBands.map((b, i) => <option value={b} data-usd={b} data-gbp={gbpBands[i]}>{b}</option>)}
+          <option value="Not sure yet">Not sure yet</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for={`${id}-website`}>Current website <span class="opt">optional</span></label>
+        <input id={`${id}-website`} name="website" type="text" inputmode="url" autocomplete="url" maxlength="300" placeholder="yourbusiness.co.uk" />
+      </div>
+    </div>
+
+    <div class="f">
+      <label for={`${id}-message`}>What's holding growth back? <span class="opt">optional</span></label>
+      <textarea id={`${id}-message`} name="message" rows="4" maxlength="4000" placeholder="e.g. We miss calls when we're busy, and our site doesn't bring in enquiries."></textarea>
+    </div>
+
+    <!-- Honeypot: real people never see or fill this -->
+    <div class="hp" aria-hidden="true">
+      <label for={`${id}-hp`}>Leave this empty</label>
+      <input id={`${id}-hp`} name="company_url" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="f check">
+      <label class="cb"><input type="checkbox" name="consent_privacy" required aria-describedby={`${id}-consent-err`} /><span>Automexa can use these details to reply to my enquiry. See the <a href="/legal/privacy/">privacy policy</a>. <span class="req" aria-hidden="true">*</span></span></label>
+      <p class="err" id={`${id}-consent-err`} data-err="consent_privacy"></p>
+      <label class="cb"><input type="checkbox" name="marketing_opt_in" /><span>Send me occasional growth ideas by email. Unsubscribe anytime.</span></label>
+    </div>
+
+    {turnstileKey && <div class="ts" data-ts></div>}
+
+    <button class="btn btn-primary btn-lg btn-block" type="submit" data-submit>
+      <span class="lbl">Book my free discovery call</span>
+      <span class="spin" aria-hidden="true"></span>
+    </button>
+    <div class="lf-foot">
+      <p class="lf-note"><Icon name="lock" />Your details go to Automexa only, and we never sell them.</p>
+      <button type="button" class="lf-clear" data-clear><Icon name="trash" /><span>Clear form</span></button>
+    </div>
+    <p class="lf-status" role="status" aria-live="polite" data-status></p>
+  </form>
+
+  <div class="lf-done" data-done hidden tabindex="-1">
+    <span class="icon-tile accent"><Icon name="check" /></span>
+    <h3 class="h3">Thanks, we've got it.</h3>
+    <p class="muted">Your request is saved. Here's what happens next:</p>
+    <ol class="next" role="list">
+      <li><Icon name="mail" /><span>We reply by email to pick a time for your free 15-minute call.</span></li>
+      <li><Icon name="chat" /><span>On the call we find your biggest growth lever.</span></li>
+      <li><Icon name="fileCheck" /><span>You get a fixed-price plan in writing, with no obligation.</span></li>
+    </ol>
+    <p class="muted small">Can't wait? Call <a href={`tel:${company.phone.tel}`}>{company.phone.display}</a> or <a href={company.whatsapp} target="_blank" rel="noopener">WhatsApp us</a>.</p>
+  </div>
+</div>
+
+<style>
+  .lf form { display: grid; gap: 18px; }
+  .lf-grid { display: grid; gap: 18px; }
+  @media (min-width: 640px) { .lf-grid { grid-template-columns: 1fr 1fr; } }
+  .f { display: grid; gap: 6px; min-width: 0; }
+  .f label, legend { font-weight: 560; font-size: 0.93rem; }
+  .opt { font-weight: 400; color: var(--ink-3); font-size: 0.82rem; margin-left: 4px; }
+  .req { color: var(--danger); }
+  input[type="text"], input[type="email"], input[type="tel"], select, textarea { width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--bg); color: var(--ink); font-size: 1rem; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+  textarea { resize: vertical; min-height: 110px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  [aria-invalid="true"] { border-color: var(--danger) !important; }
+  .err { color: var(--danger); font-size: 0.84rem; min-height: 0; }
+  .err:empty { display: none; }
+  fieldset { border: 0; padding: 0; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .chip span { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--bg); font-size: 0.9rem; transition: background-color var(--t-fast), border-color var(--t-fast); }
+  .chip :global(.icon) { width: 0; height: 16px; opacity: 0; transition: width var(--t-fast), opacity var(--t-fast); }
+  .chip input:checked + span { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .chip input:checked + span :global(.icon) { width: 16px; opacity: 1; color: var(--accent); }
+  .chip input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .check { gap: 10px; }
+  .cb { display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start; font-weight: 400 !important; font-size: 0.9rem !important; color: var(--ink-2); cursor: pointer; }
+  .cb input { width: 22px; height: 22px; margin-top: 0; accent-color: var(--ink); }
+  .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .lf-note { display: flex; gap: 8px; align-items: center; justify-content: center; font-size: 0.82rem; color: var(--ink-3); }
+  .lf-note :global(.icon) { width: 15px; height: 15px; }
+  .lf-status { font-size: 0.92rem; }
+  .lf-status.error { color: var(--danger); background: rgb(255 138 122 / 0.08); border: 1px solid rgb(255 138 122 / 0.4); border-radius: 12px; padding: 12px 14px; }
+  .spin { display: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgb(0 0 0 / 0.25); border-top-color: currentColor; animation: spin 700ms linear infinite; }
+  [data-submit][aria-busy="true"] .spin { display: inline-block; }
+  [data-submit][aria-busy="true"] { opacity: 0.85; cursor: progress; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .lf-done { display: grid; gap: 14px; justify-items: start; }
+  .lf-done:focus { outline: none; }
+  .next { list-style: none; padding: 0; display: grid; gap: 10px; }
+  .next li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+  .next :global(.icon) { width: 20px; height: 20px; color: var(--accent-ink); }
+  .small { font-size: 0.88rem; }
+  .lf-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
+  .lf-clear { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border-radius: 999px; font-size: 0.86rem; color: var(--ink-3); transition: background-color var(--t-fast), color var(--t-fast); }
+  .lf-clear:hover { background: rgb(255 138 122 / 0.1); color: var(--danger); }
+  .lf-clear :global(.icon) { width: 16px; height: 16px; }
+</style>
+
+<script>
+  import { track, getAttribution } from "../scripts/analytics";
+  import { getReferrer } from "../scripts/attribution";
+  import { confirmAction } from "../scripts/ui/chrome";
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  document.querySelectorAll<HTMLElement>("[data-leadform]").forEach((root) => {
+    const form = root.querySelector("form")!;
+    const status = root.querySelector<HTMLElement>("[data-status]")!;
+    const btn = root.querySelector<HTMLButtonElement>("[data-submit]")!;
+    const done = root.querySelector<HTMLElement>("[data-done]")!;
+    const started = Date.now();
+    let startedTracked = false;
+    const params = new URLSearchParams(location.search);
+
+    // Prefill context from the calculator / pricing buttons
+    const plan = params.get("plan");
+    const msg = form.querySelector<HTMLTextAreaElement>("[name=message]")!;
+    if (params.get("from") === "calculator" && params.get("risk")) {
+      msg.value = `From the missed-call calculator: about ${params.get("cur") || "GBP"} ${Number(params.get("risk")).toLocaleString("en-GB")} a month at risk (${params.get("calls")} calls/week, ${params.get("missed")}% missed).`;
+      const mexy = form.querySelector<HTMLInputElement>('[name=interests][value^="AI receptionist"]'); if (mexy) mexy.checked = true;
+    }
+    if (plan) { msg.value = `I'm interested in: ${plan.slice(0, 80)}`; }
+    const interest = params.get("interest");
+    if (interest) form.querySelectorAll<HTMLInputElement>("[name=interests]").forEach((c) => { if (c.value.toLowerCase().startsWith(interest.toLowerCase())) c.checked = true; });
+
+    // Optional Cloudflare Turnstile
+    const tsKey = root.dataset.turnstile;
+    if (tsKey) {
+      form.addEventListener("focusin", () => {
+        if (document.getElementById("cf-ts")) return;
+        const s = document.createElement("script"); s.id = "cf-ts"; s.async = true;
+        s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=amxTs";
+        (window as unknown as { amxTs: () => void }).amxTs = () => (window as unknown as { turnstile: { render: (el: Element, o: object) => void } }).turnstile.render(root.querySelector("[data-ts]")!, { sitekey: tsKey });
+        document.head.appendChild(s);
+      }, { once: true });
+    }
+
+    root.querySelector<HTMLButtonElement>("[data-clear]")!.addEventListener("click", async () => {
+      const ok = await confirmAction({ title: "Clear the form?", body: "Everything you've typed here will be removed. This can't be undone.", confirm: "Clear form" });
+      if (!ok) return;
+      form.reset();
+      ["name", "email", "phone", "consent_privacy"].forEach((k) => setErr(k, ""));
+      touched.clear(); status.textContent = "";
+      form.querySelector<HTMLInputElement>("[name=name]")?.focus();
+      track("lead_form_cleared", { form: root.dataset.form });
+    });
+
+    form.addEventListener("input", () => { if (!startedTracked) { startedTracked = true; track("lead_form_start", { form: root.dataset.form }); } });
+
+    const setErr = (name: string, text: string) => {
+      const el = root.querySelector<HTMLElement>(`[data-err="${name}"]`);
+      const input = form.querySelector<HTMLInputElement>(`[name="${name}"]`);
+      if (el) el.textContent = text;
+      if (input) input.setAttribute("aria-invalid", text ? "true" : "false");
+    };
+
+    const check = (fd: FormData) => {
+      const errs: Record<string, string> = {};
+      const name = String(fd.get("name") || "").trim();
+      const email = String(fd.get("email") || "").trim();
+      const phone = String(fd.get("phone") || "").trim();
+      if (!name) errs.name = "Please tell us your name.";
+      if (!email) errs.email = "We need an email to reply to you.";
+      else if (!EMAIL.test(email)) errs.email = "That email doesn't look right. Please check it.";
+      if (phone && !/^[+()\d\s.-]{7,40}$/.test(phone)) errs.phone = "Use digits, spaces and + only.";
+      if (!fd.get("consent_privacy")) errs.consent_privacy = "Please confirm we can use your details to reply.";
+      return errs;
+    };
+    const validate = (fd: FormData) => {
+      const errs = check(fd);
+      ["name", "email", "phone", "consent_privacy"].forEach((k) => setErr(k, errs[k] || ""));
+      return errs;
+    };
+
+    // Inline validation: check a field when the visitor leaves it, and clear its error as soon as it's fixed.
+    const touched = new Set<string>();
+    const LIVE = ["name", "email", "phone"];
+    form.addEventListener("focusout", (e) => {
+      const t = e.target as HTMLInputElement;
+      if (!LIVE.includes(t.name) || (!t.value && !touched.has(t.name))) return;
+      touched.add(t.name);
+      setErr(t.name, check(new FormData(form))[t.name] || "");
+    });
+    form.addEventListener("input", (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.name === "consent_privacy" && t.checked) setErr("consent_privacy", "");
+      if (touched.has(t.name) && !check(new FormData(form))[t.name]) setErr(t.name, "");
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      status.textContent = ""; status.className = "lf-status";
+      const fd = new FormData(form);
+      const errs = validate(fd);
+      if (Object.keys(errs).length) {
+        form.querySelector<HTMLElement>(`[name="${Object.keys(errs)[0]}"]`)?.focus();
+        track("lead_form_error", { form: root.dataset.form, reason: "validation" });
+        return;
+      }
+      btn.setAttribute("aria-busy", "true"); btn.disabled = true;
+      btn.querySelector(".lbl")!.textContent = "Sending…";
+      const payload = {
+        form: root.dataset.form,
+        name: fd.get("name"), email: fd.get("email"), phone: fd.get("phone"), company: fd.get("company"),
+        website: fd.get("website"), budget: fd.get("budget"), message: fd.get("message"),
+        interests: fd.getAll("interests"),
+        consent_privacy: !!fd.get("consent_privacy"), marketing_opt_in: !!fd.get("marketing_opt_in"),
+        company_url: fd.get("company_url"), elapsed_ms: Date.now() - started,
+        page: location.pathname, referrer: getReferrer(), utm: getAttribution(),
+        details: params.get("from") ? { from: params.get("from"), risk: params.get("risk"), currency: params.get("cur") } : {},
+        turnstile: fd.get("cf-turnstile-response") || undefined,
+      };
+      try {
+        const res = await fetch(root.dataset.endpoint!, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 201 && data.ok) {
+          track("lead_form_submit", { form: root.dataset.form, interests: (payload.interests as string[]).join("|").slice(0, 100) });
+          form.hidden = true; done.hidden = false; done.focus();
+          return;
+        }
+        if (res.status === 400 && data.fields) { Object.entries(data.fields as Record<string, string>).forEach(([k, v]) => setErr(k, v)); }
+        throw new Error(data.error || `HTTP ${res.status}`);
+      } catch (err) {
+        track("lead_form_error", { form: root.dataset.form, reason: String((err as Error).message).slice(0, 60) });
+        status.className = "lf-status error";
+        status.innerHTML = `<strong>Sorry, that didn't send.</strong> ${(err as Error).message && !(err as Error).message.startsWith("HTTP") && !(err as Error).message.includes("fetch") ? (err as Error).message.replace(/</g, "&lt;") + " " : ""}Nothing was saved. Please try again, or call <a href="tel:+447999988450">07999 988450</a> / email <a href="mailto:info@automexa.co.uk">info@automexa.co.uk</a>.`;
+      } finally {
+        btn.removeAttribute("aria-busy"); btn.disabled = false;
+        btn.querySelector(".lbl")!.textContent = "Book my free discovery call";
+      }
+    });
+  });
+</script>

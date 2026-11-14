@@ -1,0 +1,73 @@
+---
+/**
+ * Compact results strip with spring counters (countup.ts). Server-renders the final values,
+ * so no-JS, crawlers and reduced-motion users always see the real numbers.
+ * Numbers: results across client projects as confirmed by the owner; never per-client.
+ */
+import Icon from "./Icon.astro";
+import { results, RESULTS_NOTE } from "../data/site";
+interface Props { id?: string; title?: string; only?: number[]; }
+const { id = "results", title = "Results across our client projects", only } = Astro.props;
+const items = only ? only.map((i) => results[i]).filter(Boolean) : results;
+const fmt = (r: (typeof results)[number], v: number) => `${r.prefix}${v.toFixed(r.decimals)}${r.suffix}`;
+---
+<section class="rs" id={id} aria-labelledby={`${id}-h`} data-results>
+  <div class="wrap">
+    <div class="rs-top">
+      <h2 class="marker" id={`${id}-h`}>{title}</h2>
+    </div>
+    <ul class:list={["rs-list", `n${items.length}`]} role="list">
+      {items.map((r) => (
+        <li class="rs-item">
+          <span class="icon-tile accent"><Icon name={r.icon} /></span>
+          <p class="rs-num display" data-count={r.value} data-from={r.prefix === "Top " ? 10 : 0} data-decimals={r.decimals} data-prefix={r.prefix} data-suffix={r.suffix}>{fmt(r, r.value)}</p>
+          <p class="rs-label">{r.label}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="rs-note"><Icon name="info" /><span>{RESULTS_NOTE}</span></p>
+  </div>
+</section>
+<style>
+  .rs { padding-block: clamp(48px, 6vw, 88px); border-block: 1px solid var(--line); background: linear-gradient(180deg, rgb(212 175 55 / 0.05), transparent 70%), var(--bg-2); }
+  .rs-top { margin-bottom: 28px; }
+  .rs-list { list-style: none; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  @media (min-width: 760px) { .rs-list.n3 { grid-template-columns: repeat(3, 1fr); } .rs-list.n2 { grid-template-columns: repeat(2, 1fr); } }
+  .rs-item { background: var(--bg); padding: clamp(22px, 3vw, 34px); display: grid; gap: 10px; align-content: start; }
+  .rs-num { font-size: clamp(3.6rem, 2.6rem + 3.4vw, 6rem); color: var(--accent-ink); font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 8px; }
+  .rs-label { font-weight: 600; font-size: 1.05rem; color: var(--ink); }
+  @media (max-width: 759px) {
+    .rs-item { grid-template-columns: auto 1fr; align-items: center; column-gap: 18px; padding: 18px 20px; }
+    .rs-item .icon-tile { display: none; }
+    .rs-num { margin-top: 0; font-size: clamp(2.8rem, 2rem + 4vw, 3.6rem); width: 2.15em; }
+    .rs-label { font-size: 0.98rem; }
+  }
+  .rs-note { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; font-size: var(--fs-sm); color: var(--ink-3); max-width: 80ch; }
+  .rs-note :global(.icon) { width: 16px; height: 16px; flex: none; margin-top: 3px; }
+</style>
+<script>
+  import { countTo, seed } from "../scripts/ui/countup";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll<HTMLElement>("[data-results]").forEach((root) => {
+    const nums = [...root.querySelectorAll<HTMLElement>("[data-count]")];
+    if (reduce || !("IntersectionObserver" in window)) return; // final values are already rendered
+    const fmt = (el: HTMLElement) => (n: number) => `${el.dataset.prefix}${n.toFixed(Number(el.dataset.decimals))}${el.dataset.suffix}`;
+    // Only animate numbers that start below the fold, so nobody sees a value jump backwards.
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      const el = e.target as HTMLElement;
+      countTo(el, Number(el.dataset.count), fmt(el));
+    }), { threshold: 0.6 });
+    // first pass via an observer (no forced layout during page load): anything already on screen keeps its final value
+    const probe = new IntersectionObserver((entries) => entries.forEach((e) => {
+      probe.unobserve(e.target);
+      const el = e.target as HTMLElement;
+      if (e.isIntersecting || e.boundingClientRect.top < innerHeight) return;
+      const from = Number(el.dataset.from);
+      seed(el, from); el.textContent = fmt(el)(from);
+      io.observe(el);
+    }));
+    nums.forEach((el) => probe.observe(el));
+  });
+</script>

@@ -1,0 +1,46 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import PlanCard from "../components/PlanCard.astro";
+import Faq from "../components/Faq.astro";
+import { plans, terms, faqs } from "../data/site";
+import { faqLd } from "../lib/ld";
+import { moneyText, fillBoth } from "../lib/currency.mjs";
+import CurrencySwitch from "../components/CurrencySwitch.astro";
+const g = (q: string) => faqs.general.find((f) => f.q.startsWith(q))!;
+const pricingFaq = [g("How much"), g("How do payments"), g("Will I be locked"), { q: "Which currency do I pay in?", a: "UK clients pay in pounds sterling, and everyone else pays in US dollars. Our pound prices are fixed figures we set, so they don't move with the exchange rate. UK prices exclude VAT, which is added at the standard rate where it applies. Your written plan states the currency and the amount." }, faqs.growth[1]];
+---
+<Base title="Pricing: fixed-price websites, AI and automation" description={fillBoth("Fixed prices. Simple Website {{starter}}. Mexy with CRM {{mexySetup}} setup plus {{mexyMonthly}} a month. Enterprise is custom: book a call.")}
+  crumbs={[{ name: "Pricing", href: "/pricing/" }]} jsonLd={[faqLd(pricingFaq)]}>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="marker">Pricing</p>
+      <h1 class="h1">Know the price <span class="acc">before</span> you start.</h1>
+      <p class="lead" set:html={moneyText("One fixed fee per project, agreed in writing before work starts. Prices shown in {{curLong}}{{gbp:, excluding VAT}}.")} />
+      <CurrencySwitch id="cur-pricing" class="p-switch" />
+    </div>
+  </section>
+  <section class="section-tight" id="plans" aria-labelledby="plans-h">
+    <div class="wrap">
+      <div class="g-head"><h2 class="h2" id="plans-h">Plans</h2><p class="muted">A website, an AI receptionist with a CRM, or a custom build.</p></div>
+      <div class="grid g-plans grid-3 g3">{plans.map((p) => <PlanCard plan={p} />)}</div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="terms-h">
+    <div class="wrap">
+      <div class="section-head"><h2 class="h2" id="terms-h">What every project includes.</h2></div>
+      <ul class="grid grid-3 t-list" role="list">
+        {terms.filter((t) => ["Fixed fee, in writing", "50% books your slot", "You own everything"].includes(t.title)).map((t) => <li class="card"><span class="icon-tile accent"><Icon name={t.icon} /></span><h3 class="h3">{t.title}</h3><p class="muted">{t.title === "You own everything" ? `${t.text} Plus 30 days of aftercare.` : t.text}</p></li>)}
+      </ul>
+    </div>
+  </section>
+  <Faq items={pricingFaq} title="Pricing questions" id="price-faq" />
+</Base>
+<style>
+  :global(.p-switch) { margin-top: 22px; }
+  .g-head { display: grid; gap: 8px; margin-bottom: 28px; }
+  .g-plans { align-items: stretch; }
+  @media (min-width: 1080px) { .g-plans:not(.g3) { grid-template-columns: repeat(2, minmax(0, 520px)); } }
+  .t-list { list-style: none; padding: 0; }
+  .t-list .card { display: grid; gap: 10px; align-content: start; }
+</style>

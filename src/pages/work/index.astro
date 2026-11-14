@@ -1,0 +1,29 @@
+---
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+import Showcase from "../../components/Showcase.astro";
+import WorkList from "../../components/motion/WorkList.astro";
+import { projects } from "../../data/site";
+---
+<Base title="Work: websites, CRMs and AI built by Automexa" description="Projects Automexa has built: an AI-run CRM, Mexy our AI receptionist, and websites for UniLink, MSBT, RoseEmpire, MRA Haven, Toy Bloom, Gummy Traders and JTK." crumbs={[{ name: "Work", href: "/work/" }]}>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="marker">Work</p>
+      <h1 class="h1" data-split>Client work you can <span class="acc">open</span> and test.</h1>
+      <p class="lead">An AI-run CRM, seven websites and Mexy, our AI receptionist.</p>
+    </div>
+  </section>
+  <section class="section-tight wk" aria-labelledby="all-h">
+    <div class="wrap">
+      <h2 class="sr-only" id="all-h">All projects</h2>
+      <WorkList />
+      <Showcase items={projects} layout="grid" />
+      <p class="note muted"><Icon name="info" /><span>Looking for numbers? See our <a href="/#results">results across client projects</a>. Results vary by project.</span></p>
+    </div>
+  </section>
+</Base>
+<style>
+  .wk { padding-top: 0; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-top: 28px; font-size: var(--fs-sm); }
+  .note :global(.icon) { width: 18px; height: 18px; flex: none; margin-top: 2px; }
+</style>

@@ -1,0 +1,49 @@
+---
+import Legal from "../../layouts/Legal.astro";
+import { company, officeLine, registeredLine, tradingStatement } from "../../data/site";
+---
+<Legal title="Terms" path="/legal/terms/" updated="12 October 2026" description="Terms of use for the Automexa website and the key terms that apply to Automexa projects and subscriptions.">
+  <h2>1. About these terms</h2>
+  <p>This website is run by {company.legalName} (company no. {company.number}, registered in {company.registeredIn}; registered office {registeredLine}; office {officeLine}). Contact: <a href={`mailto:${company.email}`}>{company.email}</a>, <a href={`tel:${company.phone.tel}`}>{company.phone.display}</a>.</p>
+  <p>{tradingStatement}</p>
+  <p>Part A covers use of the website. Part B summarises how our projects work. Each project is governed by a written statement of work ("SOW") that you sign; if the SOW conflicts with these terms, the SOW wins.</p>
+
+  <h2>Part A: Using this website</h2>
+  <ul>
+    <li>Information on this site is general. Prices are shown in pounds sterling (excluding VAT) to UK visitors and in US dollars to everyone else, and may change. The price and currency in your signed SOW are the ones that apply.</li>
+    <li>Don't misuse the site, attempt to break its security, or submit spam or unlawful content.</li>
+    <li>Content on this site belongs to us or our licensors. Client websites shown belong to their owners.</li>
+    <li>Links to other sites are provided for convenience; we're not responsible for their content.</li>
+  </ul>
+
+  <h2>Part B: Projects and subscriptions</h2>
+  <h3>Quotes and booking</h3>
+  <ul>
+    <li>Every project starts with a free discovery call. We then send a fixed-price SOW setting out scope, exclusions, timeline and fee.</li>
+    <li>A 50% payment books your slot. The balance and any milestones are set out in the SOW.</li>
+    <li>Work outside the agreed scope is quoted separately before we do it.</li>
+  </ul>
+  <h3>Delivery and aftercare</h3>
+  <ul>
+    <li>We share progress and a staging link weekly. You approve each milestone.</li>
+    <li>Delivery dates depend on you providing access, content and feedback on time.</li>
+    <li>Projects include 30 days of post-launch technical support (aftercare) unless the SOW says otherwise.</li>
+  </ul>
+  <h3>Ownership</h3>
+  <ul>
+    <li>On final payment, ownership of custom designs, logos and code created for you transfers to you.</li>
+    <li>Pre-existing tools, libraries and frameworks we use remain ours or their owners'; you receive a licence to use them as part of your project.</li>
+  </ul>
+  <h3>Monthly plans (for example Mexy with CRM)</h3>
+  <ul>
+    <li>Monthly fees are billed in advance.</li>
+    <li>Notice period and cancellation: [to confirm, e.g. cancel anytime with 30 days' notice].</li>
+  </ul>
+  <h3>Consumers</h3>
+  <p>Our services are designed for businesses. If you're buying as a consumer, you may have a statutory right to cancel within 14 days under the Consumer Contracts Regulations 2013; if you ask us to start work within that period you may have to pay for work done. Nothing in these terms affects your statutory rights.</p>
+  <h3>Liability</h3>
+  <p>We don't exclude liability for death or personal injury caused by negligence, fraud, or anything else that can't be excluded by law. Otherwise, our total liability under a project is limited to the fees paid for that project in the 12 months before the claim [to confirm], and we're not liable for indirect loss or loss of profit.</p>
+
+  <h2>Law</h2>
+  <p>These terms are governed by the law of England and Wales, and the courts of England and Wales have jurisdiction.</p>
+</Legal>

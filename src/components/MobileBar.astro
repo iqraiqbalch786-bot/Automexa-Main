@@ -1,0 +1,39 @@
+---
+import Icon from "./Icon.astro";
+import { company } from "../data/site";
+---
+<nav class="mobilebar" data-mobilebar aria-label="Quick actions">
+  <button type="button" class="mb-book" popovertarget="contact-sheet" aria-haspopup="dialog" data-track="contact_dock_open" data-loc="mobile_bar"><Icon name="mail" /><span>Contact us</span></button>
+  <a class="mb-call cur-v" data-cur="USD" href={`tel:${company.mexyLine.tel}`} data-track="demo_call_click" data-loc="mobile_bar"><Icon name="phone" /><span>Call Mexy</span></a>
+  <a class="mb-call cur-v" data-cur="GBP" href={`tel:${company.mexyLineUK.tel}`} data-track="demo_call_click" data-loc="mobile_bar_uk"><Icon name="phone" /><span>Call Mexy</span></a>
+  <button class="mb-chat" type="button" data-adev-open data-loc="mobile_bar"><Icon name="chat" /><span>Chat</span></button>
+</nav>
+<style>
+  .mobilebar { position: fixed; z-index: 40; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1.15fr 1fr auto; gap: 6px; padding: 6px; border-radius: 999px; background: rgb(20 20 18 / 0.9); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.6); }
+  .mobilebar a, .mobilebar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 999px; font-weight: 580; font-size: 0.95rem; text-decoration: none; color: var(--ink); white-space: nowrap; }
+  .mobilebar :global(.icon) { width: 18px; height: 18px; }
+  .mb-book { background: var(--gold); color: #0a0a09 !important; }
+  /* Mexy demo: the only green in the chrome (Mexy-only colour rule). */
+  .mb-call { background: rgb(255 255 255 / 0.08); }
+  .mb-call :global(.icon) { color: var(--mexy); }
+  .mb-chat { padding: 0 16px; background: transparent; }
+  .mb-chat span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (min-width: 760px) { .mobilebar { display: none; } }
+  :global(body) { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  @media (min-width: 760px) { :global(body) { padding-bottom: 0; } }
+  @media (prefers-reduced-transparency: reduce) { .mobilebar { background: var(--dark); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+  @media (prefers-contrast: more) { .mobilebar { background: var(--dark); -webkit-backdrop-filter: none; backdrop-filter: none; outline: 2px solid var(--on-dark); } }
+  /* On the home page the bar waits until the hero (which has the same CTAs) scrolls away. */
+  .mobilebar { transition: transform 420ms var(--ease), opacity 300ms var(--ease), visibility 0s linear 0s; }
+  .mobilebar.mb-away { transform: translateY(calc(100% + 24px)); opacity: 0; visibility: hidden; transition: transform 420ms var(--ease), opacity 300ms var(--ease), visibility 0s linear 420ms; }
+  @media (prefers-reduced-motion: reduce) { .mobilebar, .mobilebar.mb-away { transition: none; } }
+  .mobilebar > :active { transform: scale(0.96); transition: transform 100ms ease-out; }
+  @media (prefers-reduced-motion: reduce) { .mobilebar > :active { transform: none; } }
+</style>
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-mobilebar]");
+  const hero = document.querySelector("[data-hero]");
+  if (bar && hero && "IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => bar.classList.toggle("mb-away", e.isIntersecting), { rootMargin: "-60% 0px 0px 0px" }).observe(hero);
+  }
+</script>

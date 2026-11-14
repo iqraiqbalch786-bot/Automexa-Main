@@ -1,0 +1,14 @@
+---
+/** Objection handling placed right before a CTA: the three worries we hear most, answered in a line. */
+import Icon from "./Icon.astro";
+interface Props { items?: string[]; class?: string; }
+const { items = ["Free 15-minute call", "Fixed price, in writing", "You own everything"], class: cls } = Astro.props;
+---
+<ul class:list={["assure", cls]} role="list" aria-label="What you can count on">
+  {items.map((t) => <li><Icon name="check" /><span>{t}</span></li>)}
+</ul>
+<style>
+  .assure { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.9rem; color: var(--ink-2); }
+  .assure li { display: inline-flex; align-items: center; gap: 7px; }
+  .assure :global(.icon) { width: 16px; height: 16px; color: var(--accent-ink); flex: none; }
+</style>

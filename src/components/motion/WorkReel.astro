@@ -1,0 +1,215 @@
+---
+/**
+ * Selected work, v5: eight large immersive project cards (every live site, plus Mexy and RoseEmpire CRM).
+ * - Desktop (motion on): the section pins and the cards travel horizontally, scrubbed by scroll.
+ *   Each screen scrolls through the real site as its card crosses the viewport, tilts in 3D with a
+ *   moving light, and ripples (WebGL) under the cursor. Titles decode as they arrive.
+ * - Touch (motion on): cards stack on top of each other as you scroll (sticky deck).
+ * - Static tier / reduced motion / no JS: a clean vertical list with the same content.
+ * Only real facts; screenshots are of the live sites (see CREDITS.md). Mexy is green, the rest gold.
+ */
+import MexyTel from "../MexyTel.astro";
+import { getImage } from "astro:assets";
+import Icon from "../Icon.astro";
+import HeroDemo from "../HeroDemo.astro";
+import { projects, company } from "../../data/site";
+import mexyTall from "../../assets/work/tall/mexy.jpg";
+import mrahavenTall from "../../assets/work/tall/mrahaven.jpg";
+import toybloomTall from "../../assets/work/tall/toybloom.jpg";
+import gummytradersTall from "../../assets/work/tall/gummytraders.jpg";
+import jtkremovalsTall from "../../assets/work/tall/jtkremovals.jpg";
+
+const order = ["mexy", "roseempire-crm", "unilink", "msbt", "mrahaven", "toybloom", "gummytraders", "jtkremovals"];
+const items = order.map((s) => projects.find((p) => p.slug === s)!);
+const tallSrc = { mexy: mexyTall, mrahaven: mrahavenTall, toybloom: toybloomTall, gummytraders: gummytradersTall, jtkremovals: jtkremovalsTall } as const;
+const opt = (src: ImageMetadata, width: number) => getImage({ src, width, format: "webp", quality: 72 });
+const tall: Record<string, { src: string; w: number; h: number }> = {};
+for (const [k, v] of Object.entries(tallSrc)) { const r = await opt(v, 900); tall[k] = { src: r.src, w: r.attributes.width as number, h: r.attributes.height as number }; }
+const crmAlt = (projects.find((p) => p.slug === "roseempire-crm")!.gallery || []).map((g) => g.alt);
+const chips: Record<string, string> = {
+  mexy: "Live demo line",
+  "roseempire-crm": "11 AI agents, one approval queue",
+  unilink: "Live site",
+  msbt: "Live site",
+  mrahaven: "Live site",
+  toybloom: "Live site",
+  gummytraders: "Live site",
+  jtkremovals: "Live site",
+};
+const total = String(order.length).padStart(2, "0");
+// 15 s preview loops: Playwright recordings of the public live sites (UniLink, MSBT) and an animated walkthrough of the
+// RoseEmpire CRM screens, encoded to VP9 WebM + H.264 MP4 with a first-frame poster (see CREDITS.md).
+const loops: Record<string, boolean> = { "roseempire-crm": true, unilink: true, msbt: true };
+const host = (u?: string) => (u ? new URL(u).hostname.replace(/^www\./, "") : "");
+---
+<section class="reel" id="work" aria-labelledby="work-h" tabindex="-1" data-reel data-gl="hide">
+  <div class="reel-pin" data-reel-pin>
+    <div class="wrap reel-head">
+      <div>
+        <p class="marker">Selected work</p>
+        <h2 class="h2" id="work-h" data-split>Projects you can <span class="acc">open</span> right now.</h2>
+      </div>
+      <div class="reel-ui" aria-hidden="true">
+        <span class="reel-count mono"><b data-reel-n>01</b> / {total}</span>
+        <span class="reel-prog"><i data-reel-prog></i></span>
+        <span class="reel-hint mono">Scroll</span>
+      </div>
+    </div>
+    <ol class="reel-track" role="list" data-reel-track>
+      {items.map((p, i) => (
+        <li class:list={["rc", p.mexy && "mexy-scope"]} style={`--i:${i}`} data-reel-card>
+          <article class="rc-in" aria-labelledby={`rc-t-${p.slug}`}>
+            <div class="rc-info">
+              <p class="rc-idx display" aria-hidden="true">{String(i + 1).padStart(2, "0")}</p>
+              <p class="rc-meta mono"><span>{p.kind}</span><span>{p.sector}</span></p>
+              <h3 class:list={["rc-title display", p.name.length > 10 && "rc-title-long"]} id={`rc-t-${p.slug}`}><a href={`/work/${p.slug}/`} data-cursor="View case" data-scramble data-track="work_click" data-loc={`reel_${p.slug}`}>{p.name}</a></h3>
+              <p class="rc-line">{p.line}</p>
+              <ul class="rc-tags" role="list">{p.tags.map((t) => <li class="mono">{t}</li>)}</ul>
+              <div class="rc-actions">
+                <a class="btn btn-primary" href={`/work/${p.slug}/`} data-track="work_click" data-loc={`reel_btn_${p.slug}`}><span>{p.mexy ? "See how Mexy works" : "Open the case study"}</span><Icon name="arrowRight" class="arrow" /><span class="sr-only">: {p.name}</span></a>
+                {p.mexy ? (
+                  <MexyTel class="link-arrow" loc="reel_mexy" cursor="Call" prefix="Call "> <Icon name="phone" /></MexyTel>
+                ) : p.url ? (
+                  <a class="link-arrow" href={p.url} rel="noopener" target="_blank" data-cursor="Open" data-track="outbound_click" data-loc={`reel_${p.slug}`}>{host(p.url)} <Icon name="arrowUpRight" /><span class="sr-only">(opens in a new tab)</span></a>
+                ) : null}
+              </div>
+            </div>
+            {p.mexy ? (
+            <div class="rc-stage rc-stage-mexy" data-tilt="4">
+              <div class="rc-window" aria-hidden="true">
+                <div class="rc-bar"><i></i><i></i><i></i><span class="mono">{host(p.url)}</span></div>
+                <div class="rc-screen" data-distort>
+                  <img class="rc-shot" src={tall[p.slug].src} width={tall[p.slug].w} height={tall[p.slug].h} alt="" loading="lazy" decoding="async" data-pan data-distort-img />
+                </div>
+              </div>
+              <div class="rc-demo"><HeroDemo /></div>
+              <span class="rc-glare" aria-hidden="true"></span>
+            </div>
+            ) : (
+            <a class="rc-stage" href={`/work/${p.slug}/`} data-tilt="5" data-cursor="View case" tabindex="-1" aria-hidden="true">
+              <div class="rc-window">
+                <div class="rc-bar"><i></i><i></i><i></i><span class="mono">{p.url ? host(p.url) : "roseempire-os · dashboard"}</span></div>
+                <div class="rc-screen" data-distort>
+                  {loops[p.slug] ? (
+                    <img class="rc-vid" src={`/work/video/${p.slug}-poster.webp`} width="868" height="700" alt="" loading="lazy" decoding="async" />
+                    <video class="rc-vid" muted playsinline loop preload="none" width="868" height="700" aria-hidden="true" tabindex="-1" disablepictureinpicture data-reel-video data-distort-img>
+                      <source src={`/work/video/${p.slug}.webm`} type="video/webm" />
+                      <source src={`/work/video/${p.slug}.mp4`} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img class="rc-shot" src={tall[p.slug].src} width={tall[p.slug].w} height={tall[p.slug].h} alt="" loading="lazy" decoding="async" data-pan data-distort-img />
+                  )}
+                </div>
+              </div>
+              <span class="rc-chip mono">{p.mexy && <span class="rc-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>}{chips[p.slug]}</span>
+              <span class="rc-glare"></span>
+            </a>
+            )}
+            <p class="sr-only">{p.slug === "roseempire-crm" ? `Preview loop of the dashboard, agent network and memory vault screens: ${crmAlt.join("; ")}.` : (loops[p.slug] ? `Preview loop scrolling through ${host(p.url)}.` : `Screenshot of ${host(p.url)}.`)}</p>
+          </article>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <p class="wrap reel-all"><a class="link-arrow" href="/work/">All work and case studies <Icon name="arrowRight" /></a></p>
+</section>
+
+<style>
+  .reel { position: relative; padding-top: clamp(72px, 9vw, 128px); }
+  .reel:focus { outline: none; }
+  .reel-head { display: grid; gap: 20px; align-items: end; margin-bottom: clamp(28px, 4vw, 48px); }
+  @media (min-width: 900px) { .reel-head { grid-template-columns: 1fr auto; } }
+  .reel-head .h2 { margin-top: 16px; max-width: 16ch; }
+  .reel-ui { display: none; align-items: center; gap: 16px; font-size: 0.74rem; letter-spacing: 0.12em; color: var(--ink-3); text-transform: uppercase; }
+  .reel-count b { color: var(--gold); font-weight: 500; }
+  .reel-prog { width: 160px; height: 2px; background: var(--line-2); position: relative; overflow: hidden; border-radius: 2px; }
+  .reel-prog i { position: absolute; inset: 0; background: var(--gold); transform-origin: 0 50%; transform: scaleX(0.25); }
+  .reel-track { list-style: none; padding: 0 var(--gutter); margin: 0; display: grid; gap: 28px; }
+  .reel-all { margin-top: 36px; display: flex; justify-content: center; }
+
+  /* Card -------------------------------------------------------------- */
+  .rc-in { position: relative; display: grid; gap: clamp(20px, 3vw, 44px); padding: clamp(18px, 2.4vw, 34px); border-radius: 28px;
+    background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%), linear-gradient(180deg, #151411, #0d0d0b);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.06); overflow: hidden; }
+  .rc-info { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-width: 0; }
+  .rc-idx { font-size: clamp(4rem, 9vw, 9rem); line-height: 0.8; color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 70%, transparent); letter-spacing: 0.02em; }
+  .rc-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .rc-meta span:first-child { color: var(--accent-ink); }
+  .rc-title { font-size: clamp(3rem, 2rem + 4.6vw, 7.4rem); line-height: 0.86; letter-spacing: 0.005em; text-transform: uppercase; margin: 0; }
+  .rc-title-long { font-size: clamp(2.4rem, 1.5rem + 3vw, 5rem); }
+  .rc-title a { color: var(--ink); text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 3px no-repeat; transition: background-size 500ms var(--ease), color 300ms; }
+  .rc-title a:hover { color: var(--accent-ink); background-size: 100% 3px; }
+  .rc-line { color: var(--ink-2); max-width: 40ch; font-size: 1.02rem; }
+  .rc-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .rc-tags li { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-2); }
+  .rc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 8px; }
+
+  /* Stage: window + floating chip + glare --------------------------------- */
+  .rc-stage { position: relative; display: block; min-height: 300px; transform-style: preserve-3d; color: inherit; text-decoration: none; --gx: 50%; --gy: 30%; }
+  .rc-window { position: relative; height: 100%; border-radius: 16px; overflow: hidden; background: #0c0c0b; border: 1px solid rgb(255 255 255 / 0.1);
+    box-shadow: 0 50px 100px -30px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(0 0 0 / 0.4); transform: translateZ(0); display: flex; flex-direction: column; }
+  .rc-bar { flex: none; height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 14px; background: #161512; border-bottom: 1px solid rgb(255 255 255 / 0.06); }
+  .rc-bar i { width: 9px; height: 9px; border-radius: 50%; background: #3a3833; }
+  .rc-bar span { margin-left: 12px; font-size: 0.68rem; color: var(--ink-3); letter-spacing: 0.04em; }
+  .rc-screen { position: relative; flex: 1; overflow: hidden; min-height: 260px; background: #111; }
+  .rc-shot { position: absolute; left: 0; top: 0; width: 100%; height: auto; will-change: transform; transform: translate3d(0, var(--pan, 0px), 0); }
+  .rc-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; } /* lazy poster img underneath; the video paints over it once playing */
+  .rc-slides { position: absolute; inset: 0; }
+  .rc-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; opacity: 0; }
+  .rc-slide:first-child { opacity: 1; }
+  .rc-screen :global(.dist-gl) { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 200ms; pointer-events: none; z-index: 2; }
+  .rc-chip { position: absolute; z-index: 3; left: clamp(-10px, -1vw, 0px); bottom: 22px; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    background: rgb(12 12 11 / 0.82); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); color: var(--ink); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translateZ(60px); box-shadow: 0 20px 40px -14px rgb(0 0 0 / 0.7); }
+  .rc-wave { display: inline-flex; gap: 2px; align-items: center; height: 14px; }
+  .rc-wave i { width: 2px; height: 100%; background: var(--accent); border-radius: 2px; transform-origin: 50% 50%; }
+  /* Mexy: the site scrolls in a window behind a live, animated call card (illustration, labelled as such) */
+  .rc-stage-mexy .rc-window { width: 72%; }
+  .rc-demo { position: absolute; z-index: 3; right: -2%; top: 4%; width: 500px; transform: translateZ(70px) scale(0.74); transform-origin: 100% 0; }
+  @media (max-height: 760px) and (min-width: 1024px) { .rc-demo { transform: translateZ(70px) scale(0.62); } }
+  .rc-demo :global(.demo) { max-width: none; }
+  .rc-demo :global(.d-card) { box-shadow: 0 50px 90px -30px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(61 255 116 / 0.18); }
+  .rc-demo :global(.d-cap) { background: rgb(12 12 11 / 0.8); padding: 6px 6px 6px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
+  @media (max-width: 1023px) {
+    .rc-stage.rc-stage-mexy { height: auto; min-height: 0; }
+    .rc-stage-mexy .rc-window { display: none; }
+    .rc-demo { position: relative; width: 100%; transform: none; }
+    .rc-demo :global(.d-steps) { display: none; } /* keep the Mexy card within one screen so the stacking deck still reads */
+  }
+  .rc-glare { position: absolute; inset: 0; border-radius: 16px; pointer-events: none; z-index: 4; mix-blend-mode: soft-light; opacity: 0; transition: opacity 400ms;
+    background: radial-gradient(60% 60% at var(--gx) var(--gy), rgb(255 255 255 / 0.55), transparent 60%); }
+  .rc-stage:hover .rc-glare { opacity: 1; }
+  .rc-stage:hover .rc-window { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rc-wave i { animation: rc-wave 1s ease-in-out infinite; animation-delay: calc(var(--d, 0) * 1ms); }
+    .rc-wave i:nth-child(2) { --d: 120; } .rc-wave i:nth-child(3) { --d: 240; } .rc-wave i:nth-child(4) { --d: 360; } .rc-wave i:nth-child(5) { --d: 480; }
+    @keyframes rc-wave { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+    :global(html.motion) .rc-slide { animation: rc-slide 9s infinite; animation-delay: calc(var(--k) * 3s); opacity: 0; }
+    @keyframes rc-slide { 0% { opacity: 0; transform: scale(1.04); } 6% { opacity: 1; } 33% { opacity: 1; } 40% { opacity: 0; transform: scale(1); } 100% { opacity: 0; } }
+  }
+
+  /* Layouts -------------------------------------------------------------- */
+  @media (min-width: 1024px) {
+    .rc-in { grid-template-columns: minmax(300px, 0.82fr) 1.35fr; align-items: stretch; min-height: min(72vh, 680px); }
+    .rc-stage { min-height: 0; }
+    .rc-info { justify-content: flex-end; padding-bottom: 6px; }
+  }
+  @media (max-width: 1023px) {
+    .rc-stage { height: clamp(260px, 62vw, 460px); }
+  }
+  /* Desktop motion: horizontal pinned reel */
+  @media (min-width: 1024px) {
+    :global(html.motion) .reel[data-reel-ready] .reel-ui { display: inline-flex; }
+    :global(html.motion) .reel[data-reel-ready] .reel-pin { height: 100vh; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+    :global(html.motion) .reel[data-reel-ready] .reel-track { display: flex; gap: 3vw; width: max-content; padding-right: 12vw; will-change: transform; }
+    :global(html.motion) .reel[data-reel-ready] .rc { width: min(78vw, 1240px); flex: none; }
+    :global(html.motion) .reel[data-reel-ready] .rc-in { min-height: 0; height: min(68vh, 640px); }
+    :global(html.motion) .reel[data-reel-ready] .reel-head { margin-bottom: 3vh; }
+  }
+  /* Touch motion: sticky stacking deck */
+  @media (max-width: 1023px) {
+    :global(html.motion) .reel-track { gap: 18px; }
+    :global(html.motion) .rc { position: sticky; top: calc(var(--header-h) + 10px + var(--i) * 12px); }
+    :global(html.motion) .rc-in { transform-origin: 50% 0; will-change: transform; }
+  }
+</style>

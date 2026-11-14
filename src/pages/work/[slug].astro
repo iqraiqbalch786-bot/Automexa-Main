@@ -1,0 +1,191 @@
+---
+import MexyTel from "../../components/MexyTel.astro";
+import { Picture } from "astro:assets";
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+import CallMexy from "../../components/CallMexy.astro";
+import HeroDemo from "../../components/HeroDemo.astro";
+import Showcase from "../../components/Showcase.astro";
+import Assurance from "../../components/Assurance.astro";
+import { SITE_URL, company } from "../../data/site";
+import { projects, type Project } from "../../data/site";
+import mexy from "../../assets/work/mexy.jpg";
+import roseempire from "../../assets/work/roseempire.jpg";
+import msbt from "../../assets/work/msbt.jpg";
+import unilink from "../../assets/work/unilink.jpg";
+import mrahaven from "../../assets/work/mrahaven.jpg";
+import toybloom from "../../assets/work/toybloom.jpg";
+import gummytraders from "../../assets/work/gummytraders.jpg";
+import jtkremovals from "../../assets/work/jtkremovals.jpg";
+import crmDash from "../../assets/work/crm/roseempire-os-dash.jpg";
+import crmAgents from "../../assets/work/crm/roseempire-os-agents.jpg";
+import crmVault from "../../assets/work/crm/roseempire-os-vault.jpg";
+const imgs = { mexy, roseempire, msbt, unilink, crm: crmDash, mrahaven, toybloom, gummytraders, jtkremovals } as const;
+const gal = { "crm-dash": crmDash, "crm-agents": crmAgents, "crm-vault": crmVault } as const;
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug }, props: { p } }));
+}
+const { p } = Astro.props as { p: Project };
+const rel = projects.find((x) => x.slug === p.related);
+const others = [...(rel ? [rel] : []), ...projects.filter((x) => x.slug !== p.slug && x.slug !== p.related && x.featured)].slice(0, 3);
+const host = p.url ? new URL(p.url).hostname.replace(/^www\./, "") : null;
+const fmtDate = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+const heroImg = p.gallery ? gal[p.gallery[0].img] : p.img ? imgs[p.img] : null;
+const ld = {
+  "@context": "https://schema.org", "@type": "Article", "@id": `${SITE_URL}/work/${p.slug}/#article`,
+  headline: `${p.name}: ${p.kind === "Product" ? "our product" : "case study"}`, description: p.line, about: p.sector,
+  datePublished: p.published, dateModified: p.updated,
+  author: { "@id": `${SITE_URL}/#org` }, publisher: { "@id": `${SITE_URL}/#org` },
+  mainEntityOfPage: `${SITE_URL}/work/${p.slug}/`,
+  image: `${SITE_URL}/og/pages/work-${p.slug}.jpg`,
+  ...(p.url ? { mentions: { "@type": "WebSite", name: p.client, url: p.url } } : {}),
+};
+---
+<Base title={`${p.name}: ${({ mexy: "AI voice receptionist", "roseempire-crm": "AI-run sales CRM", unilink: "recruitment website", msbt: "business school website", roseempire: "wholesale trade website", mrahaven: "estate agency website", toybloom: "online toy shop website", gummytraders: "online vape shop website", jtkremovals: "removals website" } as Record<string, string>)[p.slug] ?? p.kind.toLowerCase()} case study`} description={`${p.line} What Automexa built${p.url ? ", and the live result you can open today" : ""}.`} type="article" jsonLd={[ld]} crumbs={[{ name: "Work", href: "/work/" }, { name: p.name, href: `/work/${p.slug}/` }]}>
+  <div class:list={[p.mexy && "mexy-scope"]}>
+    <section class="page-hero">
+      <div class="wrap cs-hero">
+        <p class="marker">{p.kind === "Product" ? "Our product" : "Case study"} · {p.kind}</p>
+        <p class="cs-date mono" data-pagefind-ignore>Published <time datetime={p.published}>{fmtDate(p.published)}</time> · Updated <time datetime={p.updated}>{fmtDate(p.updated)}</time></p>
+        <h1 class="display cs-title">{p.name}</h1>
+        <p class="lead">{p.line}</p>
+        {!p.mexy && <Assurance />}
+        <div class="actions">
+          {p.mexy ? <CallMexy location={`case_${p.slug}`} /> : <a class="btn btn-primary btn-lg" href="/contact/" data-track="cta_click" data-loc={`case_${p.slug}`}><span>Get a plan like this</span><Icon name="arrowRight" class="arrow" /></a>}
+          {p.url && <a class="btn btn-ghost btn-lg" href={p.url} target="_blank" rel="noopener" data-track="work_visit" data-loc={p.slug}><span>Visit live site</span><Icon name="arrowUpRight" /><span class="sr-only">{host} (opens in a new tab)</span></a>}
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight shot-sec" aria-label="Screenshots">
+      <div class="wrap">
+        {p.gallery ? (
+          <div class="gal">
+            {p.gallery.map((g, i) => (
+              <figure class:list={["shot", i === 0 && "gal-main"]}>
+                <div class="shot-media" data-skeleton><Picture src={gal[g.img]} formats={["avif", "webp"]} fallbackFormat="jpg" widths={i === 0 ? [720, 1080, 1600, 2400] : [640, 1080, 1600]} sizes={i === 0 ? "(min-width: 1360px) 1280px, 94vw" : "(min-width: 1000px) 630px, 94vw"} alt={g.alt} loading={i === 0 ? "eager" : "lazy"} decoding="async" /></div>
+                <figcaption>{g.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        ) : p.img && (
+          <figure class="shot">
+            <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span><em class="mono">{host}</em></div>
+            <div class="shot-media" data-skeleton><Picture src={imgs[p.img]} formats={["avif", "webp"]} fallbackFormat="jpg" widths={[720, 1080, 1440]} sizes="(min-width: 1360px) 1280px, 94vw" alt={`${p.name} live site, captured October 2026`} loading="eager" decoding="async" /></div>
+            <figcaption class="mono">Live site, captured {p.captured ?? "8 Oct 2026"}</figcaption>
+          </figure>
+        )}
+      </div>
+    </section>
+
+    {p.features && (
+      <section class="section feat-sec" aria-labelledby="feat-h">
+        <div class="wrap">
+          <h2 class="h2" id="feat-h">What it <span class="acc">does</span> for the team</h2>
+          <ul class="feat" role="list">
+            {p.features.map((f) => (
+              <li class="feat-i" data-spotlight>
+                <span class="icon-tile accent"><Icon name={f.icon} /></span>
+                <h3 class="h3">{f.title}</h3>
+                <ul class="points" role="list">{f.points.map((x) => <li><Icon name="check" /><span>{x}</span></li>)}</ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    <section class="section cs-body" aria-labelledby="about-h">
+      <div class="wrap cs-grid">
+        <div>
+          <h2 class="h2" id="about-h">The <span class="acc">brief</span></h2>
+          <p class="lead cs-about">{p.about}</p>
+          <dl class="facts">
+            <div><dt class="mono">Client</dt><dd>{p.client}</dd></div>
+            <div><dt class="mono">Sector</dt><dd>{p.sector}</dd></div>
+            <div><dt class="mono">Type</dt><dd>{p.kind}</dd></div>
+            {host && <div><dt class="mono">Live</dt><dd><a href={p.url} target="_blank" rel="noopener">{host}<span class="sr-only"> (opens in a new tab)</span></a></dd></div>}
+          </dl>
+        </div>
+        <div class="cs-side">
+          {!p.features && <Fragment><h2 class="h3 label-h">What we built</h2>
+          <ul class="points" role="list">{p.built.slice(0, 3).map((b) => <li><Icon name="check" /><span>{b}</span></li>)}</ul></Fragment>}
+          {p.kind === "Product" ? (
+            <div class="card results">
+              <p class="mono res-k">Proof</p>
+              <p>Call the live demo line on <MexyTel loc="case_proof" /> and hear Mexy answer.</p>
+            </div>
+          ) : (
+            <div class="card results">
+              <p class="mono res-k">Results</p>
+              <p><strong>We report results across all our client projects.</strong> <a href="/#results">See our results</a></p>
+              <p class="res-note">Results vary by project.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {p.mexy && (
+      <section class="section-tight" aria-labelledby="demo-h">
+        <div class="wrap demo">
+          <div>
+            <h2 class="h2" id="demo-h">Hear it <span class="acc">work.</span></h2>
+            <p class="lead">This is what a missed call turns into. Then call the live line and try her yourself.</p>
+            <a class="link-arrow" href="/mexy/">Everything Mexy does <Icon name="arrowRight" /></a>
+          </div>
+          <HeroDemo />
+        </div>
+      </section>
+    )}
+  </div>
+
+  <section class="section more" aria-labelledby="more-h">
+    <div class="wrap">
+      <h2 class="h2" id="more-h">More <span class="acc">work</span></h2>
+      <div class="more-list"><Showcase items={others} layout="grid" /></div>
+    </div>
+  </section>
+</Base>
+<style>
+  .cs-hero { display: grid; gap: 20px; justify-items: start; }
+  .cs-title { font-size: clamp(4rem, 2.4rem + 8vw, 11rem); color: var(--ink); margin-top: 6px; }
+  .shot-sec { padding-top: 0; }
+  .shot { margin: 0; border-radius: var(--r-xl); overflow: hidden; border: 1px solid var(--line-2); background: var(--surface); box-shadow: 0 40px 90px -40px rgb(0 0 0 / 0.9); }
+  .shot-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .shot-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); }
+  .shot-bar em { margin-left: 12px; font-style: normal; font-size: 0.74rem; color: var(--ink-3); }
+  .shot :global(img) { display: block; width: 100%; height: auto; }
+  .shot figcaption { padding: 10px 16px; font-size: 0.72rem; color: var(--ink-3); border-top: 1px solid var(--line); }
+  .gal { display: grid; gap: 16px; }
+  @media (min-width: 1000px) { .gal { grid-template-columns: 1fr 1fr; } .gal-main { grid-column: 1 / -1; } }
+  .gal figcaption { font-family: var(--font); font-size: 0.86rem; color: var(--ink-2); }
+  .feat-sec { padding-bottom: 0; }
+  .feat { list-style: none; padding: 0; margin-top: clamp(28px, 4vw, 48px); display: grid; gap: 14px; }
+  @media (min-width: 720px) { .feat { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .feat { grid-template-columns: repeat(3, 1fr); } }
+  .feat-i { display: grid; gap: 12px; align-content: start; padding: clamp(22px, 3vw, 30px); border-radius: var(--r-xl); background: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.012)); border: 1px solid var(--line-2); }
+  .feat-i .h3 { text-transform: uppercase; font-weight: 700; letter-spacing: -0.01em; }
+  .feat-i .points { font-size: 0.95rem; color: var(--ink-2); }
+  .cs-date { font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+  .res-k { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 8px; }
+  .results p + p { margin-top: 8px; }
+  .results a { color: var(--accent-ink); }
+  .res-note { font-size: 0.82rem; color: var(--ink-3); }
+  .cs-grid { display: grid; gap: 48px; }
+  @media (min-width: 1000px) { .cs-grid { grid-template-columns: 1.3fr 1fr; gap: 80px; } }
+  .cs-about { margin-top: 20px; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; margin-top: 36px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+  .facts div { background: var(--bg); padding: 16px 18px; display: grid; gap: 6px; }
+  .facts dt { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .facts dd { margin: 0; color: var(--ink); }
+  .facts a { color: var(--accent-ink); }
+  .cs-side { display: grid; gap: 20px; align-content: start; }
+  .cs-side > .points { font-size: 1.02rem; }
+  .demo { display: grid; gap: 40px; align-items: center; }
+  .demo .lead { margin: 16px 0 20px; }
+  @media (min-width: 1000px) { .demo { grid-template-columns: 1fr 1fr; } }
+  .more { border-top: 1px solid var(--line); }
+  .more-list { margin-top: 36px; }
+</style>

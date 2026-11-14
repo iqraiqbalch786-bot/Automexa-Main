@@ -1,0 +1,171 @@
+---
+/**
+ * Hero animation: a missed call becoming a booked client.
+ * - Pure CSS transitions on opacity/transform (no layout shift), driven by a ~1 KB timeline script.
+ * - Without JS or with prefers-reduced-motion it shows the finished state.
+ * - Pauses off-screen and has a visible pause control (WCAG 2.2.2).
+ */
+import Icon from "./Icon.astro";
+const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const times = ["09:00", "10:00", "11:00"];
+const busy = new Set(["0-0", "1-2", "2-1", "3-0", "4-2", "0-2"]); // existing appointments (illustrative)
+const target = "3-1"; // Thu 10:00
+---
+<figure class="demo mexy-scope" data-demo>
+  <div class="d-card">
+    <div class="d-head">
+      <span class="d-live"><span class="d-dot" aria-hidden="true"></span>Mexy · AI receptionist</span>
+      <span class="mono d-clock">Wed 19:42</span>
+    </div>
+
+    <ol class="d-steps" role="list">
+      <li class="d-step on" data-at="0">
+        <span class="d-ic d-ring"><Icon name="phoneIn" /></span>
+        <div><p class="d-t">Incoming call</p><p class="d-s">You're with a client. Phone on silent.</p></div>
+        <span class="d-tag mono">After hours</span>
+      </li>
+      <li class="d-step on" data-at="1">
+        <span class="d-ic d-green"><Icon name="wave" /></span>
+        <div><p class="d-t">Mexy answers on the first ring</p><p class="d-s">"Hi, thanks for calling Automexa! I'm Mexy, the AI receptionist."</p></div>
+        <span class="d-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      </li>
+      <li class="d-step on" data-at="3">
+        <span class="d-ic"><Icon name="lead" /></span>
+        <div>
+          <p class="d-t">Lead captured</p>
+          <p class="d-chips"><span>Sarah K.</span><span>New website + ads</span><span>Ready to start</span></p>
+        </div>
+      </li>
+      <li class="d-step on" data-at="4">
+        <span class="d-ic"><Icon name="calendarCheck" /></span>
+        <div class="d-cal-wrap">
+          <p class="d-t">Discovery call booked</p>
+          <div class="d-cal" aria-hidden="true">
+            <span></span>{days.map((d) => <span class="d-day mono">{d}</span>)}
+            {times.map((t, r) => (
+              <>
+                <span class="d-time mono">{t}</span>
+                {days.map((_, c) => {
+                  const k = `${c}-${r}`;
+                  return <span class:list={["d-cell", busy.has(k) && "busy", k === target && "target"]}>{k === target && <Icon name="check" />}</span>;
+                })}
+              </>
+            ))}
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="d-foot">
+      <div class="d-stat"><span class="d-k mono">Missed calls</span><span class="d-v">0</span></div>
+      <div class="d-stat"><span class="d-k mono">Booked this week</span><span class="d-v d-roll on" data-at="5"><span>3</span><span>4</span></span></div>
+      <div class="d-stat d-note on" data-at="5"><Icon name="bell" /><span>Summary sent to you</span></div>
+    </div>
+  </div>
+  <figcaption class="d-cap">
+    <span>Illustration: how Mexy turns an after-hours call into a booked client.</span>
+    <button type="button" class="d-pause" data-demo-toggle aria-pressed="false"><Icon name="pause" class="i-pause" /><Icon name="play" class="i-play" /><span class="sr-only">Pause animation</span></button>
+  </figcaption>
+</figure>
+
+<style>
+  .demo { margin: 0; width: 100%; max-width: 520px; }
+  .d-card { position: relative; background: var(--dark); color: var(--on-dark); border-radius: 28px; padding: 18px; box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.04) inset; overflow: hidden; }
+  .d-head { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 14px; font-size: 0.82rem; color: var(--on-dark-2); }
+  .d-live { display: inline-flex; align-items: center; gap: 8px; color: var(--on-dark); font-weight: 560; }
+  .d-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-bright); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .d-steps { list-style: none; padding: 0; display: grid; gap: 8px; position: relative; }
+  .d-step { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: start; padding: 12px; border-radius: 18px; background: var(--dark-2); border: 1px solid var(--dark-line); }
+  .d-ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--dark-3); color: var(--on-dark); }
+  .d-ic :global(.icon) { width: 20px; height: 20px; }
+  .d-green { background: var(--accent-bright); color: var(--on-accent); }
+  .d-t { font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; line-height: 1.3; }
+  .d-s { color: var(--on-dark-2); font-size: 0.83rem; line-height: 1.4; margin-top: 2px; }
+  .d-tag { font-size: 0.68rem; padding: 4px 8px; border-radius: 999px; background: rgb(255 255 255 / 0.07); color: var(--on-dark-2); white-space: nowrap; }
+  .d-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .d-chips span { font-size: 0.75rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-bright); }
+  .d-step:nth-child(3), .d-step:nth-child(4) { grid-template-columns: 40px 1fr; }
+  .d-bars { display: flex; align-items: center; gap: 3px; height: 40px; }
+  .d-bars i { width: 3px; height: 8px; border-radius: 2px; background: var(--accent-bright); transform-origin: center; }
+  .d-cal { display: grid; grid-template-columns: 34px repeat(5, 1fr); gap: 4px; margin-top: 8px; font-size: 0.64rem; color: var(--on-dark-2); }
+  .d-day { text-align: center; }
+  .d-time { align-self: center; }
+  .d-cell { height: 20px; border-radius: 6px; background: rgb(255 255 255 / 0.05); display: grid; place-items: center; }
+  .d-cell.busy { background: rgb(255 255 255 / 0.16); }
+  .d-cell.target { background: var(--accent-bright); color: var(--on-accent); }
+  .d-cell.target :global(.icon) { width: 13px; height: 13px; stroke-width: 2.4; }
+  .d-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .d-stat { padding: 12px; border-radius: 16px; background: var(--dark-2); border: 1px solid var(--dark-line); display: grid; gap: 2px; }
+  .d-k { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--on-dark-2); }
+  .d-v { font-size: 1.6rem; font-weight: 640; letter-spacing: -0.03em; line-height: 1.15; height: 1.15em; overflow: hidden; display: block; }
+  .d-roll span { display: block; transition: transform 600ms var(--ease); }
+  .d-roll.on span { transform: translateY(-100%); }
+  .d-note { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--on-dark); }
+  .d-note :global(.icon) { width: 18px; height: 18px; color: var(--accent-bright); }
+  .d-cap { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; font-size: var(--fs-xs); color: var(--ink-3); }
+  .d-pause { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line-2); color: var(--ink-2); flex: none; }
+  .d-pause:hover { border-color: var(--ink); color: var(--ink); }
+  .d-pause :global(.icon) { width: 14px; height: 14px; }
+  .d-pause :global(.i-play), .d-pause[aria-pressed="true"] :global(.i-pause) { display: none; }
+  .d-pause[aria-pressed="true"] :global(.i-play) { display: block; }
+
+  /* Animated states (only when JS drives the timeline) */
+  @media (prefers-reduced-motion: no-preference) {
+    .d-step, .d-note { transition: opacity 500ms var(--ease), transform 600ms var(--ease), border-color 500ms; }
+    .anim .d-step:not(.on), .anim .d-note:not(.on) { opacity: 0.0; transform: translateY(10px) scale(0.98); }
+    .anim .d-step.on.now { border-color: var(--accent-line); }
+    .d-cell.target { transition: background-color 400ms, transform 500ms var(--ease); }
+    .d-cell.target :global(.icon) { transition: opacity 300ms 200ms; }
+    .anim:not(.booked) .d-cell.target { background: rgb(255 255 255 / 0.05); transform: scale(0.85); }
+    .anim:not(.booked) .d-cell.target :global(.icon) { opacity: 0; }
+    .anim.ringing .d-ring { animation: shake 900ms ease-in-out infinite; background: var(--on-dark); color: var(--dark); }
+    .anim.talking .d-bars i { animation: bar 900ms ease-in-out infinite; }
+    .d-bars i:nth-child(2) { animation-delay: -200ms !important; } .d-bars i:nth-child(3) { animation-delay: -450ms !important; } .d-bars i:nth-child(4) { animation-delay: -120ms !important; } .d-bars i:nth-child(5) { animation-delay: -600ms !important; }
+    .anim.paused *, .anim.paused { animation-play-state: paused !important; }
+    .anim.resetting .d-steps, .anim.resetting .d-foot { opacity: 0; transition: opacity 400ms; }
+    .d-steps, .d-foot { transition: opacity 400ms; }
+  }
+  @keyframes shake { 0%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(-12deg); } 20%, 40% { transform: rotate(12deg); } 50% { transform: rotate(0); } }
+  @keyframes bar { 0%, 100% { transform: scaleY(0.6); } 50% { transform: scaleY(3.4); } }
+  @media (prefers-reduced-motion: reduce) { .d-pause { display: none; } }
+  @media (max-width: 380px) { .d-tag { display: none; } .d-step:first-child { grid-template-columns: 40px 1fr; } }
+</style>
+
+<script>
+  const fig = document.querySelector<HTMLElement>("[data-demo]");
+  if (fig && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const card = fig.querySelector<HTMLElement>(".d-card")!;
+    const items = [...fig.querySelectorAll<HTMLElement>("[data-at]")];
+    const toggle = fig.querySelector<HTMLButtonElement>("[data-demo-toggle]")!;
+    // step -> time (ms). 0 ring, 1 answer/talk, 3 lead, 4 booked, 5 counter+notify
+    const plan: [number, number][] = [[0, 0], [1, 1700], [3, 4300], [4, 6000], [5, 7400]];
+    const LOOP = 11500;
+    let t0 = 0, elapsed = 0, raf = 0, step = -1, visible = false, paused = false;
+    const set = (s: number) => {
+      if (s === step) return; step = s;
+      items.forEach((el) => { const at = +el.dataset.at!; el.classList.toggle("on", at <= s); el.classList.toggle("now", at === s || (s === 2 && at === 1)); });
+      card.classList.toggle("ringing", s === 0);
+      card.classList.toggle("talking", s >= 1 && s < 3);
+      card.classList.toggle("booked", s >= 4);
+    };
+    const frame = (now: number) => {
+      if (!t0) t0 = now - elapsed;
+      elapsed = now - t0;
+      if (elapsed > LOOP) { card.classList.add("resetting"); if (elapsed > LOOP + 450) { t0 = now; elapsed = 0; step = -1; set(0); card.classList.remove("resetting"); } }
+      else { let s = 0; for (const [k, ms] of plan) if (elapsed >= ms) s = k; set(s); }
+      raf = requestAnimationFrame(frame);
+    };
+    const run = () => { if (visible && !paused && !raf) { t0 = 0; raf = requestAnimationFrame(frame); } };
+    const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+    card.classList.add("anim"); set(0);
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; visible ? run() : stop(); }, { threshold: 0.2 }).observe(card);
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : run()));
+    toggle.addEventListener("click", () => {
+      paused = !paused;
+      toggle.setAttribute("aria-pressed", String(paused));
+      toggle.querySelector(".sr-only")!.textContent = paused ? "Play animation" : "Pause animation";
+      card.classList.toggle("paused", paused);
+      paused ? stop() : run();
+    });
+  }
+</script>

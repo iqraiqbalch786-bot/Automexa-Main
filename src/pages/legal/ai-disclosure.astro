@@ -1,0 +1,22 @@
+---
+import Legal from "../../layouts/Legal.astro";
+import { company } from "../../data/site";
+---
+<Legal title="AI disclosure" path="/legal/ai-disclosure/" updated="8 October 2026" description="How Automexa uses AI: Mexy, our AI receptionist, and ADEV, our AI chat assistant. What they do, their limits, and how to reach a person.">
+  <h2>Our AI assistants</h2>
+  <ul>
+    <li><strong>Mexy</strong> is an AI receptionist. She answers calls to our demo lines ({company.mexyLineUK.display} in the UK and {company.mexyLine.display} in the US) and, for clients, their business lines. She introduces herself as an AI receptionist.</li>
+    <li><strong>ADEV</strong> is an AI chat assistant on this website. It answers questions about our services.</li>
+  </ul>
+  <h2>What they can and can't do</h2>
+  <ul>
+    <li>They can answer common questions, take your details and help arrange a call.</li>
+    <li>They can make mistakes. Prices and terms in your written plan always take priority over anything an AI says.</li>
+    <li>They don't make decisions about you with legal or similarly significant effects.</li>
+    <li>They're not for emergencies. In an emergency, call 999.</li>
+  </ul>
+  <h2>Talking to a person</h2>
+  <p>Ask Mexy to speak to someone, or contact us on <a href={`tel:${company.phone.tel}`}>{company.phone.display}</a> or <a href={`mailto:${company.email}`}>{company.email}</a>.</p>
+  <h2>Your data</h2>
+  <p>See our <a href="/legal/privacy/">privacy policy</a> for what's collected during calls and chats, who processes it and your rights.</p>
+</Legal>
